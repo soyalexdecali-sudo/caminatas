@@ -58,7 +58,7 @@
     <!-- PASO 1: buscar por documento -->
     <div id="paso-buscar">
       <label for="in-documento">Número de documento de identidad *</label>
-      <input type="text" id="in-documento" inputmode="numeric" placeholder="Ej: 145789632">
+      <input type="text" id="in-documento" inputmode="numeric" placeholder="Ej: 121154541">
       <button class="btn-primario" id="btn-buscar">Continuar</button>
       <div id="msg-buscar"></div>
     </div>
@@ -104,20 +104,7 @@
       <label for="f-contacto-telefono">Teléfono del contacto de emergencia</label>
       <input type="tel" id="f-contacto-telefono">
 
-      <div class="consentimiento">
-        <strong>Consentimiento y responsabilidad del participante.</strong>
-        La participación en esta caminata es gratuita, voluntaria y bajo la responsabilidad de cada participante.
-        Si se menciona algún costo, este se debe pagar directamente al dueño del predio. La actividad se desarrolla
-        en un entorno natural y puede implicar riesgos propios de este tipo de recorridos (caídas, resbalones,
-        golpes, lesiones, picaduras, condiciones climáticas, dificultades del terreno u otras situaciones
-        imprevistas). El participante declara haber sido informado de estos riesgos, participar de forma libre y
-        voluntaria, y comprender que la actividad no cuenta con seguro individual de accidentes. Cada persona es
-        responsable de evaluar sus propias condiciones y tomar las medidas de prevención que considere necesarias.
-        Quien invita o acompaña a otro participante no asume responsabilidad por las decisiones, condiciones
-        físicas, comportamiento, seguridad o eventuales accidentes de esa persona por el solo hecho de invitarla o
-        acompañarla. El participante se compromete a actuar de forma responsable y a seguir las instrucciones de
-        los organizadores.
-      </div>
+      <div class="consentimiento" id="texto-consentimiento"></div>
       <div class="fila-check">
         <input type="checkbox" id="f-acepta" required>
         <label for="f-acepta">He leído y acepto las condiciones anteriores.</label>
@@ -142,9 +129,56 @@
   const params = new URLSearchParams(window.location.search);
   const CAMINATA = params.get('caminata') || 'Caminata';
   const FECHA = params.get('fecha') || '';
+  // tipo: 'gratuita' (por defecto) o 'pagada'
+  const TIPO = (params.get('tipo') || 'gratuita').toLowerCase();
+  // seguro: 'no' (por defecto) o 'si'
+  const SEGURO = (params.get('seguro') || 'no').toLowerCase();
+  const VALOR = params.get('valor') || '';
 
   document.getElementById('titulo-evento').textContent =
     CAMINATA + (FECHA ? ' · ' + FECHA : '');
+
+  function construirConsentimiento() {
+    let parteCosto;
+    if (TIPO === 'pagada') {
+      const montoTexto = VALOR ? (' de $' + VALOR) : '';
+      parteCosto = 'La participación en esta caminata tiene un costo' + montoTexto +
+        ', el cual debe ser cancelado según las indicaciones del organizador. La actividad se ' +
+        'desarrolla en un entorno natural y puede implicar riesgos propios de este tipo de recorridos ' +
+        '(caídas, resbalones, golpes, lesiones, picaduras, condiciones climáticas, dificultades del ' +
+        'terreno u otras situaciones imprevistas). El participante declara haber sido informado de ' +
+        'estos riesgos y participar de forma libre y voluntaria.';
+    } else {
+      parteCosto = 'La participación en esta caminata es gratuita, voluntaria y bajo la ' +
+        'responsabilidad de cada participante. La actividad se desarrolla en un entorno natural y ' +
+        'puede implicar riesgos propios de este tipo de recorridos (caídas, resbalones, golpes, ' +
+        'lesiones, picaduras, condiciones climáticas, dificultades del terreno u otras situaciones ' +
+        'imprevistas). El participante declara haber sido informado de estos riesgos y participar de ' +
+        'forma libre y voluntaria.';
+    }
+
+    let parteSeguro;
+    if (SEGURO === 'si') {
+      parteSeguro = 'Esta actividad cuenta con seguro contra accidentes para los participantes ' +
+        'registrados; sin embargo, dicha cobertura no exime a cada persona de evaluar sus propias ' +
+        'condiciones físicas y de salud, ni de tomar las medidas de prevención que considere necesarias.';
+    } else {
+      parteSeguro = 'El participante comprende que la actividad no cuenta con seguro individual de ' +
+        'accidentes. Cada persona es responsable de evaluar sus propias condiciones y tomar las ' +
+        'medidas de prevención que considere necesarias.';
+    }
+
+    const cierre = 'Quien invita o acompaña a otro participante no asume responsabilidad por las ' +
+      'decisiones, condiciones físicas, comportamiento, seguridad o eventuales accidentes de esa ' +
+      'persona por el solo hecho de invitarla o acompañarla. El participante se compromete a actuar ' +
+      'de forma responsable y a seguir las instrucciones de los organizadores.';
+
+    document.getElementById('texto-consentimiento').innerHTML =
+      '<strong>Consentimiento y responsabilidad del participante.</strong> ' +
+      parteCosto + ' ' + parteSeguro + ' ' + cierre;
+  }
+
+  construirConsentimiento();
 
   const elBuscar = document.getElementById('btn-buscar');
   const elDocumentoBusqueda = document.getElementById('in-documento');
@@ -215,7 +249,10 @@
       contactoTelefono: document.getElementById('f-contacto-telefono').value.trim(),
       aceptaConsentimiento: document.getElementById('f-acepta').checked,
       caminata: CAMINATA,
-      fecha: FECHA
+      fecha: FECHA,
+      tipo: TIPO,
+      seguro: SEGURO,
+      valor: VALOR
     };
 
     if (!datos.aceptaConsentimiento) {
