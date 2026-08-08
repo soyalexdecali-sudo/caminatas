@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro de caminata</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f2f5f3;
+    margin: 0;
+    padding: 24px 16px 60px;
+    color: #1f2a24;
+  }
+  .card {
+    max-width: 520px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; color: #2e5d3f; }
+  .subtitulo { font-size: 14px; color: #5c6b62; margin: 0 0 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 4px; }
+  input[type=text], input[type=tel], input[type=email], input[type=date], select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #cfd8d3;
+    border-radius: 8px; font-size: 15px; background: #fff; font-family: inherit;
+  }
+  input:focus, select:focus { outline: 2px solid #2e5d3f; border-color: #2e5d3f; }
+  button {
+    cursor: pointer; border: none; border-radius: 8px;
+    padding: 12px 18px; font-size: 15px; font-weight: 600;
+  }
+  .btn-primario { background: #2e5d3f; color: #fff; width: 100%; margin-top: 22px; }
+  .btn-primario:disabled { background: #9db6a5; cursor: default; }
+  .oculto { display: none; }
+  .aviso { font-size: 13px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; }
+  .aviso-ok { background: #e6f4ea; color: #2e5d3f; }
+  .aviso-error { background: #fdecea; color: #a13a2c; }
+  .consentimiento {
+    font-size: 12.5px; line-height: 1.5; color: #4a564e;
+    background: #f7f9f7; border: 1px solid #e1e7e3; border-radius: 8px;
+    padding: 12px; max-height: 160px; overflow-y: auto; margin-top: 18px;
+  }
+  .fila-check { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
+  .fila-check input { width: auto; margin-top: 3px; }
+  .fila-check label { margin: 0; font-weight: 500; font-size: 13px; }
+  .pantalla-final { text-align: center; padding: 30px 10px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Registro para la caminata</h1>
+    <p class="subtitulo" id="titulo-evento">Cargando...</p>
+
+    <!-- PASO 1: buscar por documento -->
+    <div id="paso-buscar">
+      <label for="in-documento">Número de documento de identidad *</label>
+      <input type="text" id="in-documento" inputmode="numeric" placeholder="Ej: 94531114">
+      <button class="btn-primario" id="btn-buscar">Continuar</button>
+      <div id="msg-buscar"></div>
+    </div>
+
+    <!-- PASO 2: formulario -->
+    <form id="form-datos" class="oculto">
+      <div id="msg-encontrado"></div>
+
+      <label for="f-nombre">Nombre y Apellidos *</label>
+      <input type="text" id="f-nombre" required>
+
+      <label for="f-tipo-doc">Tipo de documento de Identidad *</label>
+      <select id="f-tipo-doc" required>
+        <option value="">Selecciona...</option>
+        <option>Cédula de ciudadania</option>
+        <option>Pasaporte</option>
+        <option>Cédula de extrangeria</option>
+        <option>Registro civil</option>
+        <option>Tarjeta de Identidad</option>
+      </select>
+
+      <label for="f-doc">Número de documento de Identidad *</label>
+      <input type="text" id="f-doc" required readonly>
+
+      <label for="f-nacimiento">Fecha de Nacimiento *</label>
+      <input type="date" id="f-nacimiento" required>
+
+      <label for="f-telefono">Teléfono de contacto personal *</label>
+      <input type="tel" id="f-telefono" required>
+
+      <label for="f-correo">Correo electrónico</label>
+      <input type="email" id="f-correo">
+
+      <label for="f-sangre">Grupo Sanguíneo *</label>
+      <input type="text" id="f-sangre" required placeholder="Ej: O+">
+
+      <label for="f-salud">¿Tiene cobertura de salud? Indica sí/no y tu EPS si aplica *</label>
+      <textarea id="f-salud" rows="2" required></textarea>
+
+      <label for="f-contacto-nombre">Nombre de un contacto de emergencia</label>
+      <input type="text" id="f-contacto-nombre">
+
+      <label for="f-contacto-telefono">Teléfono del contacto de emergencia</label>
+      <input type="tel" id="f-contacto-telefono">
+
+      <div class="consentimiento">
+        <strong>Consentimiento y responsabilidad del participante.</strong>
+        La participación en esta caminata es gratuita, voluntaria y bajo la responsabilidad de cada participante.
+        Si se menciona algún costo, este se debe pagar directamente al dueño del predio. La actividad se desarrolla
+        en un entorno natural y puede implicar riesgos propios de este tipo de recorridos (caídas, resbalones,
+        golpes, lesiones, picaduras, condiciones climáticas, dificultades del terreno u otras situaciones
+        imprevistas). El participante declara haber sido informado de estos riesgos, participar de forma libre y
+        voluntaria, y comprender que la actividad no cuenta con seguro individual de accidentes. Cada persona es
+        responsable de evaluar sus propias condiciones y tomar las medidas de prevención que considere necesarias.
+        Quien invita o acompaña a otro participante no asume responsabilidad por las decisiones, condiciones
+        físicas, comportamiento, seguridad o eventuales accidentes de esa persona por el solo hecho de invitarla o
+        acompañarla. El participante se compromete a actuar de forma responsable y a seguir las instrucciones de
+        los organizadores.
+      </div>
+      <div class="fila-check">
+        <input type="checkbox" id="f-acepta" required>
+        <label for="f-acepta">He leído y acepto las condiciones anteriores.</label>
+      </div>
+
+      <button type="submit" class="btn-primario" id="btn-enviar">Enviar registro</button>
+      <div id="msg-enviar"></div>
+    </form>
+
+    <!-- PASO 3: confirmación -->
+    <div id="paso-final" class="oculto pantalla-final">
+      <h1>¡Listo! ✅</h1>
+      <p class="subtitulo" id="msg-final"></p>
+    </div>
+  </div>
+
+<script>
+  // URL de tu Web App de Apps Script (backend). Si vuelves a implementar
+  // y Google te da una URL distinta, solo actualiza esta línea.
+  const API_URL = 'https://script.google.com/macros/s/AKfycby9NPt5iV1at6NAGQpXirEN3TJQD0fXvMzMGnP70tQTfIK5_poBSqNJnQCQPVHViP6V/exec';
+
+  const params = new URLSearchParams(window.location.search);
+  const CAMINATA = params.get('caminata') || 'Caminata';
+  const FECHA = params.get('fecha') || '';
+
+  document.getElementById('titulo-evento').textContent =
+    CAMINATA + (FECHA ? ' · ' + FECHA : '');
+
+  const elBuscar = document.getElementById('btn-buscar');
+  const elDocumentoBusqueda = document.getElementById('in-documento');
+  const elMsgBuscar = document.getElementById('msg-buscar');
+  const elPasoBuscar = document.getElementById('paso-buscar');
+  const elForm = document.getElementById('form-datos');
+  const elMsgEncontrado = document.getElementById('msg-encontrado');
+  const elPasoFinal = document.getElementById('paso-final');
+
+  elBuscar.addEventListener('click', async function () {
+    const doc = elDocumentoBusqueda.value.trim();
+    if (!doc) {
+      elMsgBuscar.innerHTML = '<div class="aviso aviso-error">Escribe tu número de documento.</div>';
+      return;
+    }
+    elBuscar.disabled = true;
+    elMsgBuscar.innerHTML = 'Buscando...';
+
+    try {
+      const resp = await fetch(API_URL + '?accion=buscar&documento=' + encodeURIComponent(doc));
+      const data = await resp.json();
+      elBuscar.disabled = false;
+      elMsgBuscar.innerHTML = '';
+      mostrarFormulario(doc, data.caminante);
+    } catch (err) {
+      elBuscar.disabled = false;
+      elMsgBuscar.innerHTML = '<div class="aviso aviso-error">Ocurrió un error buscando tus datos. Intenta de nuevo.</div>';
+    }
+  });
+
+  function mostrarFormulario(doc, caminante) {
+    document.getElementById('f-doc').value = doc;
+
+    if (caminante) {
+      elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Encontramos tus datos de una caminata anterior. Revisa y corrige lo que haya cambiado.</div>';
+      document.getElementById('f-nombre').value = caminante.nombre || '';
+      document.getElementById('f-tipo-doc').value = caminante.tipoDocumento || '';
+      document.getElementById('f-nacimiento').value = caminante.fechaNacimiento || '';
+      document.getElementById('f-telefono').value = caminante.telefono || '';
+      document.getElementById('f-correo').value = caminante.correo || '';
+      document.getElementById('f-sangre').value = caminante.grupoSanguineo || '';
+      document.getElementById('f-salud').value = caminante.salud || '';
+      document.getElementById('f-contacto-nombre').value = caminante.contactoNombre || '';
+      document.getElementById('f-contacto-telefono').value = caminante.contactoTelefono || '';
+    } else {
+      elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Es tu primer registro. Completa tus datos.</div>';
+    }
+
+    elPasoBuscar.classList.add('oculto');
+    elForm.classList.remove('oculto');
+  }
+
+  elForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const btnEnviar = document.getElementById('btn-enviar');
+    const msgEnviar = document.getElementById('msg-enviar');
+
+    const datos = {
+      numeroDocumento: document.getElementById('f-doc').value.trim(),
+      tipoDocumento: document.getElementById('f-tipo-doc').value,
+      nombre: document.getElementById('f-nombre').value.trim(),
+      fechaNacimiento: document.getElementById('f-nacimiento').value,
+      telefono: document.getElementById('f-telefono').value.trim(),
+      correo: document.getElementById('f-correo').value.trim(),
+      grupoSanguineo: document.getElementById('f-sangre').value.trim(),
+      salud: document.getElementById('f-salud').value.trim(),
+      contactoNombre: document.getElementById('f-contacto-nombre').value.trim(),
+      contactoTelefono: document.getElementById('f-contacto-telefono').value.trim(),
+      aceptaConsentimiento: document.getElementById('f-acepta').checked,
+      caminata: CAMINATA,
+      fecha: FECHA
+    };
+
+    if (!datos.aceptaConsentimiento) {
+      msgEnviar.innerHTML = '<div class="aviso aviso-error">Debes aceptar las condiciones para continuar.</div>';
+      return;
+    }
+
+    btnEnviar.disabled = true;
+    msgEnviar.innerHTML = 'Guardando...';
+
+    try {
+      // text/plain evita el preflight CORS que Apps Script no responde bien
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(datos)
+      });
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error || 'Error desconocido');
+
+      elForm.classList.add('oculto');
+      document.getElementById('msg-final').textContent =
+        'Tu registro para ' + CAMINATA + ' quedó guardado. Nos vemos en la caminata.';
+      elPasoFinal.classList.remove('oculto');
+    } catch (err) {
+      btnEnviar.disabled = false;
+      msgEnviar.innerHTML = '<div class="aviso aviso-error">No se pudo guardar. Intenta de nuevo.</div>';
+    }
+  });
+</script>
+</body>
+</html>
