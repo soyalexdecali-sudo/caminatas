@@ -612,37 +612,62 @@
   });
 
   /**
-   * Abre el checkout de Wompi via widget oficial (requiere clave pública).
-   * Pre-carga el monto seleccionado automáticamente.
+   * Abre el checkout de Wompi via API programática (WidgetCheckout).
+   *
+   * ⚠️  NO se debe re-inyectar widget.js en cada clic: Wompi genera un
+   *     "token de aceptación" al cargar el script y si se recarga el mismo
+   *     script el token queda marcado como "ya usado".
+   *
+   *     Solución: cargamos widget.js UNA SOLA VEZ (sin data-render, para no
+   *     renderizar ningún botón) y luego usamos `new WidgetCheckout({...})`
+   *     en cada clic — Wompi genera un token fresco en cada .open().
    */
+  var _wompiScriptCargado = false;
+
   function abrirWompiCheckout(publicKey, centavos, referencia, redirectUrl) {
-    // Eliminar instancia previa si existe
-    const prev = document.getElementById('wompi-script-container');
-    if (prev) prev.remove();
 
-    const container = document.createElement('div');
-    container.id = 'wompi-script-container';
-    container.style.display = 'none';
-    document.body.appendChild(container);
+    function _abrirCheckout() {
+      var checkout = new WidgetCheckout({
+        currency:       'COP',
+        amountInCents:  centavos,
+        reference:      referencia,
+        publicKey:      publicKey,
+        redirectUrl:    redirectUrl
+      });
 
-    const script = document.createElement('script');
+      checkout.open(function(result) {
+        // Wompi redirige automáticamente vía redirectUrl.
+        // Este callback es un respaldo por si la redirección no ocurre.
+        if (result && result.transaction && result.transaction.status === 'APPROVED') {
+          var baseUrl = window.location.origin + window.location.pathname;
+          var p = new URLSearchParams({
+            caminata: CAMINATA, fecha: FECHA, tipo: TIPO, seguro: SEGURO,
+            doc: docRegistrado, centavos: String(centavos), wompi_pago: '1',
+            status: 'APPROVED', id: result.transaction.id
+          });
+          if (VALOR) p.set('valor', VALOR);
+          window.location.href = baseUrl + '?' + p.toString();
+        }
+      });
+    }
+
+    // Si ya está cargado, abrir directamente
+    if (_wompiScriptCargado && typeof WidgetCheckout !== 'undefined') {
+      _abrirCheckout();
+      return;
+    }
+
+    // Primera vez: cargar widget.js sin data-render (solo necesitamos la clase)
+    var script = document.createElement('script');
     script.src = 'https://checkout.wompi.co/widget.js';
-    script.setAttribute('data-render', 'button');
-    script.setAttribute('data-public-key', publicKey);
-    script.setAttribute('data-currency', 'COP');
-    script.setAttribute('data-amount-in-cents', String(centavos));
-    script.setAttribute('data-reference', referencia);
-    script.setAttribute('data-redirect-url', redirectUrl);
-
-    // Cuando el widget cargue, clic automático en el botón generado
     script.onload = function() {
-      setTimeout(function() {
-        const wBtn = container.querySelector('button, [type="button"]');
-        if (wBtn) wBtn.click();
-      }, 200);
+      _wompiScriptCargado = true;
+      _abrirCheckout();
     };
-
-    container.appendChild(script);
+    script.onerror = function() {
+      alert('No se pudo cargar el módulo de pago. Verifica tu conexión e intenta de nuevo.');
+    };
+    document.head.appendChild(script);
   }
 
   /** Clic en "Pagar más tarde" → saltar al paso final sin pago. */
