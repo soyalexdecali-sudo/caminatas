@@ -105,21 +105,6 @@
     background: #b0a0cc;
     cursor: default;
   }
-  /* Botón "pagar más tarde" */
-  .btn-saltar {
-    background: transparent;
-    color: #5c6b62;
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1px solid #cfd8d3;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .btn-saltar:hover { background: #f5f5f5; }
-
   /* Ícono de confirmación de pago */
   .pago-confirmado-icono { font-size: 52px; margin-bottom: 8px; }
 </style>
@@ -220,9 +205,6 @@
         💳 Ir a pagar con Wompi
       </button>
       <div id="hint-monto-wompi" style="display:none; font-size:12.5px; color:#5c6b62; text-align:center; margin-top:6px; padding:6px 10px; background:#f7f9f7; border-radius:6px; border:1px solid #e1e7e3;"></div>
-      <button class="btn-saltar" id="btn-saltar-pago">
-        Pagar más tarde
-      </button>
     </div>
 
     <!-- PASO 4: confirmación final -->
@@ -465,6 +447,19 @@
     }
 
     btnEnviar.disabled = true;
+
+    // ── Caminata PAGADA: guardar datos localmente y proceder al pago ─────────
+    // El registro solo se envía al servidor DESPUÉS de confirmar el pago Wompi.
+    if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
+      docRegistrado = datos.numeroDocumento;
+      try { sessionStorage.setItem('_pendingReg', JSON.stringify(datos)); } catch(e) {}
+      elForm.classList.add('oculto');
+      renderizarOpcionesPago();
+      document.getElementById('paso-pago').classList.remove('oculto');
+      return;
+    }
+
+    // ── Caminata GRATUITA: enviar al servidor directamente ────────────────────
     msgEnviar.innerHTML = 'Guardando...';
 
     try {
@@ -487,10 +482,6 @@
             'Tu inscripción y pago para ' + CAMINATA + ' ya están registrados. ¡Nos vemos en la caminata!';
           document.getElementById('msg-pago').style.display = 'none';
           elPasoFinal.classList.remove('oculto');
-        } else if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
-          document.getElementById('aviso-ya-inscrito').style.display = 'block';
-          renderizarOpcionesPago();
-          document.getElementById('paso-pago').classList.remove('oculto');
         } else {
           document.getElementById('icono-final').textContent = '✅';
           document.getElementById('titulo-final').textContent = '¡Ya estás inscrito!';
@@ -504,19 +495,9 @@
 
       if (!data.ok) throw new Error(data.error || 'Error desconocido');
 
-      // Guardar doc para usarlo en el link de Wompi
       docRegistrado = datos.numeroDocumento;
-
       elForm.classList.add('oculto');
-
-      // ¿Tiene opciones de pago Wompi?
-      if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
-        renderizarOpcionesPago();
-        document.getElementById('paso-pago').classList.remove('oculto');
-      } else {
-        // Sin Wompi: mostrar pantalla final con info de pago tradicional
-        mostrarPasoFinal(false, false);
-      }
+      mostrarPasoFinal(false, false);
     } catch (err) {
       btnEnviar.disabled = false;
       msgEnviar.innerHTML =
@@ -686,11 +667,6 @@
     });
   }
 
-  /** Clic en "Pagar más tarde" → saltar al paso final sin pago. */
-  document.getElementById('btn-saltar-pago').addEventListener('click', function() {
-    document.getElementById('paso-pago').classList.add('oculto');
-    mostrarPasoFinal(false, false);
-  });
 
   // ── Paso 4 – confirmación final ────────────────────────────────────────────
 
@@ -765,8 +741,7 @@
       document.getElementById('icono-final').textContent = '⚠️';
       document.getElementById('titulo-final').textContent = 'Pago no completado';
       document.getElementById('msg-final').textContent =
-        'Tu inscripción quedó guardada, pero el pago no fue procesado. ' +
-        'Contacta al organizador para coordinar el pago.';
+        'El pago no fue completado. Puedes intentarlo de nuevo desde el inicio.';
       const divPago = document.getElementById('msg-pago');
       divPago.innerHTML =
         'Estado Wompi: <strong>' + escapeHtml(status || 'cancelado') + '</strong>. ' +
@@ -776,24 +751,41 @@
       return;
     }
 
-    // Pago aprobado → confirmar en la hoja de cálculo
+    // Pago aprobado → registrar o confirmar en la hoja de cálculo
+    var pendingReg = null;
+    try { pendingReg = JSON.parse(sessionStorage.getItem('_pendingReg') || 'null'); } catch(e) {}
+
     try {
-      const resp = await fetch(
-        API_URL +
-        '?accion=confirmarpago' +
-        '&doc='      + encodeURIComponent(doc) +
-        '&caminata=' + encodeURIComponent(CAMINATA) +
-        '&fecha='    + encodeURIComponent(FECHA) +
-        '&centavos=' + encodeURIComponent(centavos)
-      );
-      const data = await resp.json();
+      var data;
+      if (pendingReg) {
+        // Nueva inscripción: enviar formulario + confirmación de pago juntos
+        pendingReg.wompiPagado = true;
+        pendingReg.centavos = centavos;
+        const resp = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(pendingReg)
+        });
+        data = await resp.json();
+        try { sessionStorage.removeItem('_pendingReg'); } catch(e) {}
+      } else {
+        // Inscripción existente: solo confirmar el pago
+        const resp = await fetch(
+          API_URL +
+          '?accion=confirmarpago' +
+          '&doc='      + encodeURIComponent(doc) +
+          '&caminata=' + encodeURIComponent(CAMINATA) +
+          '&fecha='    + encodeURIComponent(FECHA) +
+          '&centavos=' + encodeURIComponent(centavos)
+        );
+        data = await resp.json();
+      }
 
       cargando.classList.add('oculto');
 
-      if (data.ok) {
+      if (data.ok || data.yaInscrito) {
         mostrarPasoFinal(true, centavos);
       } else {
-        // El pago fue aprobado por Wompi pero no pudimos registrarlo en la hoja
         document.getElementById('icono-final').textContent = '⚠️';
         document.getElementById('titulo-final').textContent = 'Pago recibido';
         document.getElementById('msg-final').textContent =
