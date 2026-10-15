@@ -39,15 +39,22 @@
   .aviso { font-size: 13px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; }
   .aviso-ok { background: #e6f4ea; color: #2e5d3f; }
   .aviso-error { background: #fdecea; color: #a13a2c; }
+  .aviso-pago {
+    background: #e8f5e9; border-left: 4px solid #2e5d3f;
+    color: #1b5e20; padding: 14px 16px; border-radius: 6px; margin-top: 16px;
+    font-size: 13.5px; line-height: 1.6; text-align: left;
+  }
   .consentimiento {
     font-size: 12.5px; line-height: 1.5; color: #4a564e;
     background: #f7f9f7; border: 1px solid #e1e7e3; border-radius: 8px;
     padding: 12px; max-height: 160px; overflow-y: auto; margin-top: 18px;
   }
   .fila-check { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
-  .fila-check input { width: auto; margin-top: 3px; }
+  .fila-check input { width: auto; margin-top: 3px; flex-shrink: 0; }
   .fila-check label { margin: 0; font-weight: 500; font-size: 13px; }
   .pantalla-final { text-align: center; padding: 30px 10px; }
+  .cerrado-icono { font-size: 48px; margin-bottom: 8px; }
+  .cargando-wrap { text-align: center; padding: 24px 0; color: #5c6b62; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -55,8 +62,20 @@
     <h1>Registro para la caminata</h1>
     <p class="subtitulo" id="titulo-evento">Cargando...</p>
 
+    <!-- CARGANDO -->
+    <div id="paso-cargando" class="cargando-wrap">
+      Verificando disponibilidad&hellip;
+    </div>
+
+    <!-- INSCRIPCIONES CERRADAS -->
+    <div id="paso-cerrado" class="oculto pantalla-final">
+      <div class="cerrado-icono">🚫</div>
+      <h1 style="color:#b71c1c;">Inscripciones cerradas</h1>
+      <p class="subtitulo" id="msg-cerrado">Esta caminata ha alcanzado su capacidad máxima de participantes.</p>
+    </div>
+
     <!-- PASO 1: buscar por documento -->
-    <div id="paso-buscar">
+    <div id="paso-buscar" class="oculto">
       <label for="in-documento">Número de documento de identidad *</label>
       <input type="text" id="in-documento" inputmode="numeric" placeholder="Ej: 121154541">
       <button class="btn-primario" id="btn-buscar">Continuar</button>
@@ -104,6 +123,12 @@
       <label for="f-contacto-telefono">Teléfono del contacto de emergencia</label>
       <input type="tel" id="f-contacto-telefono">
 
+      <!-- NUEVO: transporte particular -->
+      <div class="fila-check" style="margin-top: 18px;">
+        <input type="checkbox" id="f-transporte">
+        <label for="f-transporte">¿Requiere transporte particular para esta caminata?</label>
+      </div>
+
       <div class="consentimiento" id="texto-consentimiento"></div>
       <div class="fila-check">
         <input type="checkbox" id="f-acepta" required>
@@ -118,6 +143,7 @@
     <div id="paso-final" class="oculto pantalla-final">
       <h1>¡Listo! ✅</h1>
       <p class="subtitulo" id="msg-final"></p>
+      <div id="msg-pago" class="aviso-pago" style="display:none;"></div>
     </div>
   </div>
 
@@ -128,16 +154,20 @@
 
   const params = new URLSearchParams(window.location.search);
   const CAMINATA = params.get('caminata') || 'Caminata';
-  const FECHA = params.get('fecha') || '';
-  // tipo: 'gratuita' (por defecto) o 'pagada'
-  const TIPO = (params.get('tipo') || 'gratuita').toLowerCase();
-  // seguro: 'no' (por defecto) o 'si'
-  const SEGURO = (params.get('seguro') || 'no').toLowerCase();
-  const VALOR = params.get('valor') || '';
+  const FECHA    = params.get('fecha')    || '';
+  const TIPO     = (params.get('tipo')   || 'gratuita').toLowerCase();
+  const SEGURO   = (params.get('seguro') || 'no').toLowerCase();
+  const VALOR    = params.get('valor')   || '';
 
   document.getElementById('titulo-evento').textContent =
     CAMINATA + (FECHA ? ' · ' + FECHA : '');
 
+  // CONFIG cargado al inicio desde el backend
+  let CONFIG = { ok: false, formasPago: [], cerrado: false, limite: 0, inscritosCount: 0 };
+
+  // ──────────────────────────────────────────────────────────────────────
+  // Texto de consentimiento (dinámico según tipo y seguro)
+  // ──────────────────────────────────────────────────────────────────────
   function construirConsentimiento() {
     let parteCosto;
     if (TIPO === 'pagada') {
@@ -173,23 +203,61 @@
       'persona por el solo hecho de invitarla o acompañarla. El participante se compromete a actuar ' +
       'de forma responsable y a seguir las instrucciones de los organizadores.';
 
+    const autorizacionImagen = 'Adicionalmente, el participante autoriza expresamente el uso de ' +
+      'fotografías y/o videos en los que aparezca, tomados durante esta actividad, exclusivamente ' +
+      'para fines de registro y publicidad de las caminatas del grupo.';
+
     document.getElementById('texto-consentimiento').innerHTML =
       '<strong>Consentimiento y responsabilidad del participante.</strong> ' +
-      parteCosto + ' ' + parteSeguro + ' ' + cierre;
+      parteCosto + ' ' + parteSeguro + ' ' + cierre + ' ' + autorizacionImagen;
   }
 
   construirConsentimiento();
 
-  const elBuscar = document.getElementById('btn-buscar');
-  const elDocumentoBusqueda = document.getElementById('in-documento');
-  const elMsgBuscar = document.getElementById('msg-buscar');
-  const elPasoBuscar = document.getElementById('paso-buscar');
-  const elForm = document.getElementById('form-datos');
-  const elMsgEncontrado = document.getElementById('msg-encontrado');
-  const elPasoFinal = document.getElementById('paso-final');
+  // ──────────────────────────────────────────────────────────────────────
+  // Iniciar: cargar config y verificar límite
+  // ──────────────────────────────────────────────────────────────────────
+  async function iniciar() {
+    try {
+      const resp = await fetch(
+        API_URL +
+        '?accion=config' +
+        '&caminata=' + encodeURIComponent(CAMINATA) +
+        '&fecha='    + encodeURIComponent(FECHA)
+      );
+      CONFIG = await resp.json();
+    } catch (e) {
+      CONFIG = { ok: false, formasPago: [], cerrado: false };
+    }
+
+    document.getElementById('paso-cargando').classList.add('oculto');
+
+    if (CONFIG.cerrado) {
+      const msgCerrado = document.getElementById('msg-cerrado');
+      if (CONFIG.limite > 0) {
+        msgCerrado.textContent =
+          'Esta caminata ya alcanzó su cupo máximo de ' + CONFIG.limite +
+          ' participantes. ¡Gracias por tu interés!';
+      }
+      document.getElementById('paso-cerrado').classList.remove('oculto');
+    } else {
+      document.getElementById('paso-buscar').classList.remove('oculto');
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────────────────
+  // Paso 1 – búsqueda por documento
+  // ──────────────────────────────────────────────────────────────────────
+  const elBuscar         = document.getElementById('btn-buscar');
+  const elDocBusqueda    = document.getElementById('in-documento');
+  const elMsgBuscar      = document.getElementById('msg-buscar');
+  const elPasoBuscar     = document.getElementById('paso-buscar');
+  const elForm           = document.getElementById('form-datos');
+  const elMsgEncontrado  = document.getElementById('msg-encontrado');
+  const elPasoFinal      = document.getElementById('paso-final');
 
   elBuscar.addEventListener('click', async function () {
-    const doc = elDocumentoBusqueda.value.trim();
+    const doc = elDocBusqueda.value.trim();
     if (!doc) {
       elMsgBuscar.innerHTML = '<div class="aviso aviso-error">Escribe tu número de documento.</div>';
       return;
@@ -214,15 +282,15 @@
 
     if (caminante) {
       elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Encontramos tus datos de una caminata anterior. Revisa y corrige lo que haya cambiado.</div>';
-      document.getElementById('f-nombre').value = caminante.nombre || '';
-      document.getElementById('f-tipo-doc').value = caminante.tipoDocumento || '';
-      document.getElementById('f-nacimiento').value = caminante.fechaNacimiento || '';
-      document.getElementById('f-telefono').value = caminante.telefono || '';
-      document.getElementById('f-correo').value = caminante.correo || '';
-      document.getElementById('f-sangre').value = caminante.grupoSanguineo || '';
-      document.getElementById('f-salud').value = caminante.salud || '';
-      document.getElementById('f-contacto-nombre').value = caminante.contactoNombre || '';
-      document.getElementById('f-contacto-telefono').value = caminante.contactoTelefono || '';
+      document.getElementById('f-nombre').value           = caminante.nombre           || '';
+      document.getElementById('f-tipo-doc').value         = caminante.tipoDocumento    || '';
+      document.getElementById('f-nacimiento').value       = caminante.fechaNacimiento  || '';
+      document.getElementById('f-telefono').value         = caminante.telefono         || '';
+      document.getElementById('f-correo').value           = caminante.correo           || '';
+      document.getElementById('f-sangre').value           = caminante.grupoSanguineo   || '';
+      document.getElementById('f-salud').value            = caminante.salud            || '';
+      document.getElementById('f-contacto-nombre').value  = caminante.contactoNombre   || '';
+      document.getElementById('f-contacto-telefono').value= caminante.contactoTelefono || '';
     } else {
       elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Es tu primer registro. Completa tus datos.</div>';
     }
@@ -231,28 +299,32 @@
     elForm.classList.remove('oculto');
   }
 
+  // ──────────────────────────────────────────────────────────────────────
+  // Paso 2 – envío del formulario
+  // ──────────────────────────────────────────────────────────────────────
   elForm.addEventListener('submit', async function (e) {
     e.preventDefault();
     const btnEnviar = document.getElementById('btn-enviar');
     const msgEnviar = document.getElementById('msg-enviar');
 
     const datos = {
-      numeroDocumento: document.getElementById('f-doc').value.trim(),
-      tipoDocumento: document.getElementById('f-tipo-doc').value,
-      nombre: document.getElementById('f-nombre').value.trim(),
-      fechaNacimiento: document.getElementById('f-nacimiento').value,
-      telefono: document.getElementById('f-telefono').value.trim(),
-      correo: document.getElementById('f-correo').value.trim(),
-      grupoSanguineo: document.getElementById('f-sangre').value.trim(),
-      salud: document.getElementById('f-salud').value.trim(),
-      contactoNombre: document.getElementById('f-contacto-nombre').value.trim(),
-      contactoTelefono: document.getElementById('f-contacto-telefono').value.trim(),
+      numeroDocumento:    document.getElementById('f-doc').value.trim(),
+      tipoDocumento:      document.getElementById('f-tipo-doc').value,
+      nombre:             document.getElementById('f-nombre').value.trim(),
+      fechaNacimiento:    document.getElementById('f-nacimiento').value,
+      telefono:           document.getElementById('f-telefono').value.trim(),
+      correo:             document.getElementById('f-correo').value.trim(),
+      grupoSanguineo:     document.getElementById('f-sangre').value.trim(),
+      salud:              document.getElementById('f-salud').value.trim(),
+      contactoNombre:     document.getElementById('f-contacto-nombre').value.trim(),
+      contactoTelefono:   document.getElementById('f-contacto-telefono').value.trim(),
+      requiereTransporte: document.getElementById('f-transporte').checked,
       aceptaConsentimiento: document.getElementById('f-acepta').checked,
       caminata: CAMINATA,
-      fecha: FECHA,
-      tipo: TIPO,
-      seguro: SEGURO,
-      valor: VALOR
+      fecha:    FECHA,
+      tipo:     TIPO,
+      seguro:   SEGURO,
+      valor:    VALOR
     };
 
     if (!datos.aceptaConsentimiento) {
@@ -274,14 +346,34 @@
       if (!data.ok) throw new Error(data.error || 'Error desconocido');
 
       elForm.classList.add('oculto');
+
       document.getElementById('msg-final').textContent =
         'Tu registro para ' + CAMINATA + ' quedó guardado. Nos vemos en la caminata.';
+
+      // Mensaje de pago (siempre visible)
+      const divPago = document.getElementById('msg-pago');
+      let pagoHTML = '<strong>💳 Si la caminata requiere pago, tu inscripción se consolida al realizar el pago en:</strong><br>';
+      if (CONFIG.formasPago && CONFIG.formasPago.length > 0) {
+        pagoHTML += CONFIG.formasPago
+          .map(fp => fp.forma + ': <strong>' + fp.descripcion + '</strong>')
+          .join('<br>');
+      } else {
+        pagoHTML += 'Consulta con el organizador la forma de pago.';
+      }
+      divPago.innerHTML = pagoHTML;
+      divPago.style.display = 'block';
+
       elPasoFinal.classList.remove('oculto');
     } catch (err) {
       btnEnviar.disabled = false;
-      msgEnviar.innerHTML = '<div class="aviso aviso-error">No se pudo guardar. Intenta de nuevo.</div>';
+      msgEnviar.innerHTML =
+        '<div class="aviso aviso-error">No se pudo guardar. ' +
+        (err.message || 'Intenta de nuevo.') + '</div>';
     }
   });
+
+  // Iniciar al cargar la página
+  iniciar();
 </script>
 </body>
 </html>
