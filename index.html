@@ -614,60 +614,76 @@
   /**
    * Abre el checkout de Wompi via API programática (WidgetCheckout).
    *
-   * ⚠️  NO se debe re-inyectar widget.js en cada clic: Wompi genera un
-   *     "token de aceptación" al cargar el script y si se recarga el mismo
-   *     script el token queda marcado como "ya usado".
+   * Flujo:
+   *  1. Pide la firma de integridad al Apps Script (?accion=wompifirma).
+   *  2. Carga widget.js UNA SOLA VEZ (sin data-render para no consumir token).
+   *  3. Abre el checkout con `new WidgetCheckout({ integrity, ... })`.
    *
-   *     Solución: cargamos widget.js UNA SOLA VEZ (sin data-render, para no
-   *     renderizar ningún botón) y luego usamos `new WidgetCheckout({...})`
-   *     en cada clic — Wompi genera un token fresco en cada .open().
+   * La firma evita "Firma de integridad requerida no enviada".
+   * Cargar el script solo una vez evita "token de aceptación ya fue usado".
    */
   var _wompiScriptCargado = false;
 
   function abrirWompiCheckout(publicKey, centavos, referencia, redirectUrl) {
 
-    function _abrirCheckout() {
-      var checkout = new WidgetCheckout({
-        currency:       'COP',
-        amountInCents:  centavos,
-        reference:      referencia,
-        publicKey:      publicKey,
-        redirectUrl:    redirectUrl
-      });
+    // ── Paso 1: obtener firma de integridad desde el servidor ─────────────
+    fetch(
+      API_URL +
+      '?accion=wompifirma' +
+      '&centavos='   + encodeURIComponent(centavos) +
+      '&referencia=' + encodeURIComponent(referencia)
+    )
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.ok) throw new Error(data.error || 'Error generando firma Wompi');
+      var firma = data.firma;
 
-      checkout.open(function(result) {
-        // Wompi redirige automáticamente vía redirectUrl.
-        // Este callback es un respaldo por si la redirección no ocurre.
-        if (result && result.transaction && result.transaction.status === 'APPROVED') {
-          var baseUrl = window.location.origin + window.location.pathname;
-          var p = new URLSearchParams({
-            caminata: CAMINATA, fecha: FECHA, tipo: TIPO, seguro: SEGURO,
-            doc: docRegistrado, centavos: String(centavos), wompi_pago: '1',
-            status: 'APPROVED', id: result.transaction.id
-          });
-          if (VALOR) p.set('valor', VALOR);
-          window.location.href = baseUrl + '?' + p.toString();
-        }
-      });
-    }
+      // ── Paso 2: función que abre el checkout con la firma ───────────────
+      function _abrirCheckout() {
+        var checkout = new WidgetCheckout({
+          currency:              'COP',
+          amountInCents:         centavos,
+          reference:             referencia,
+          publicKey:             publicKey,
+          redirectUrl:           redirectUrl,
+          'signature:integrity': firma   // campo correcto en la API programática de Wompi
+        });
 
-    // Si ya está cargado, abrir directamente
-    if (_wompiScriptCargado && typeof WidgetCheckout !== 'undefined') {
-      _abrirCheckout();
-      return;
-    }
+        checkout.open(function(result) {
+          // Wompi redirige automáticamente vía redirectUrl al aprobar.
+          // Este callback es respaldo por si la redirección no ocurre.
+          if (result && result.transaction && result.transaction.status === 'APPROVED') {
+            var baseUrl = window.location.origin + window.location.pathname;
+            var p = new URLSearchParams({
+              caminata: CAMINATA, fecha: FECHA, tipo: TIPO, seguro: SEGURO,
+              doc: docRegistrado, centavos: String(centavos), wompi_pago: '1',
+              status: 'APPROVED', id: result.transaction.id
+            });
+            if (VALOR) p.set('valor', VALOR);
+            window.location.href = baseUrl + '?' + p.toString();
+          }
+        });
+      }
 
-    // Primera vez: cargar widget.js sin data-render (solo necesitamos la clase)
-    var script = document.createElement('script');
-    script.src = 'https://checkout.wompi.co/widget.js';
-    script.onload = function() {
-      _wompiScriptCargado = true;
-      _abrirCheckout();
-    };
-    script.onerror = function() {
-      alert('No se pudo cargar el módulo de pago. Verifica tu conexión e intenta de nuevo.');
-    };
-    document.head.appendChild(script);
+      // ── Paso 3: cargar widget.js una sola vez (solo la clase, sin botón) ─
+      if (_wompiScriptCargado && typeof WidgetCheckout !== 'undefined') {
+        _abrirCheckout();
+      } else {
+        var script = document.createElement('script');
+        script.src = 'https://checkout.wompi.co/widget.js';
+        script.onload = function() {
+          _wompiScriptCargado = true;
+          _abrirCheckout();
+        };
+        script.onerror = function() {
+          alert('No se pudo cargar el módulo de pago. Verifica tu conexión e intenta de nuevo.');
+        };
+        document.head.appendChild(script);
+      }
+    })
+    .catch(function(err) {
+      alert('Error preparando el pago: ' + err.message);
+    });
   }
 
   /** Clic en "Pagar más tarde" → saltar al paso final sin pago. */
