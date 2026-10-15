@@ -452,7 +452,7 @@
     // El registro solo se envía al servidor DESPUÉS de confirmar el pago Wompi.
     if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
       docRegistrado = datos.numeroDocumento;
-      try { sessionStorage.setItem('_pendingReg', JSON.stringify(datos)); } catch(e) {}
+      try { localStorage.setItem('_pendingReg', JSON.stringify(datos)); } catch(e) {}
       elForm.classList.add('oculto');
       renderizarOpcionesPago();
       document.getElementById('paso-pago').classList.remove('oculto');
@@ -753,7 +753,7 @@
 
     // Pago aprobado → registrar o confirmar en la hoja de cálculo
     var pendingReg = null;
-    try { pendingReg = JSON.parse(sessionStorage.getItem('_pendingReg') || 'null'); } catch(e) {}
+    try { pendingReg = JSON.parse(localStorage.getItem('_pendingReg') || 'null'); } catch(e) {}
 
     try {
       var data;
@@ -767,7 +767,7 @@
           body: JSON.stringify(pendingReg)
         });
         data = await resp.json();
-        try { sessionStorage.removeItem('_pendingReg'); } catch(e) {}
+        try { localStorage.removeItem('_pendingReg'); } catch(e) {}
       } else {
         // Inscripción existente: solo confirmar el pago
         const resp = await fetch(
