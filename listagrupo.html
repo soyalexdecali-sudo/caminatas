@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grupo WhatsApp – Caminatas</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f0;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+      color: #222;
+    }
+
+    .card {
+      max-width: 660px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2d6a4f, #40916c);
+      color: #fff;
+      padding: 20px 24px 16px;
+    }
+    .header h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
+    .header .meta { font-size: .9rem; opacity: .85; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,.22);
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: .8rem;
+      margin-top: 6px;
+    }
+
+    .body { padding: 20px 24px; }
+
+    .section-title {
+      font-size: .85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #2d6a4f;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      font-family: 'Courier New', monospace;
+      font-size: .9rem;
+      padding: 10px 12px;
+      border: 1.5px solid #c8e6c9;
+      border-radius: 8px;
+      resize: vertical;
+      color: #1b4332;
+      background: #f6fbf7;
+      outline: none;
+    }
+    textarea:focus { border-color: #40916c; }
+
+    .btn-row { display: flex; align-items: center; gap: 10px; margin: 10px 0 20px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #25D366;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .95rem;
+      font-weight: 600;
+      transition: background .15s;
+    }
+    .btn:hover { background: #1ebe5b; }
+    .btn:active { background: #17a84e; }
+
+    .ok-msg {
+      font-size: .88rem;
+      font-weight: 600;
+      color: #2d6a4f;
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    thead th {
+      background: #2d6a4f;
+      color: #fff;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 600;
+    }
+    thead th:first-child { border-radius: 6px 0 0 0; }
+    thead th:last-child  { border-radius: 0 6px 0 0; text-align: center; }
+    tbody tr:nth-child(even) td { background: #f6fbf7; }
+    tbody td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e8f5e9;
+      vertical-align: middle;
+    }
+    .num { color: #888; text-align: center; }
+    .tel { font-family: 'Courier New', monospace; }
+    .fmt { font-family: 'Courier New', monospace; color: #1b4332; }
+    .wa  { text-align: center; }
+    .wa a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      background: #25D366;
+      border-radius: 50%;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background .15s;
+    }
+    .wa a:hover { background: #1ebe5b; }
+
+    .tip {
+      margin-top: 20px;
+      background: #e8f5e9;
+      border-left: 4px solid #40916c;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: .83rem;
+      color: #1b4332;
+      line-height: 1.5;
+    }
+
+    /* Loading / error states */
+    .state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #555;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 4px solid #c8e6c9;
+      border-top-color: #2d6a4f;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-icon { font-size: 2rem; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="app">
+  <div class="state" id="loading">
+    <div class="spinner"></div>
+    <p>Cargando participantes…</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var params   = new URLSearchParams(window.location.search);
+  var apiUrl   = params.get('api')      || '';
+  var caminata = params.get('caminata') || '';
+  var fecha    = params.get('fecha')    || '';
+
+  var app = document.getElementById('app');
+
+  function showError(msg) {
+    app.innerHTML =
+      '<div class="header"><h1>🥾 Grupo WhatsApp</h1></div>' +
+      '<div class="body"><div class="state">' +
+        '<div class="error-icon">⚠️</div>' +
+        '<p>' + escHtml(msg) + '</p>' +
+      '</div></div>';
+  }
+
+  if (!apiUrl || !caminata || !fecha) {
+    showError('Faltan parámetros en la URL (api, caminata, fecha).');
+    return;
+  }
+
+  var endpoint = apiUrl
+    + '?accion=listagrupo'
+    + '&caminata=' + encodeURIComponent(caminata)
+    + '&fecha='    + encodeURIComponent(fecha);
+
+  fetch(endpoint)
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (data) {
+      if (!data.ok) { showError(data.error || 'Error del servidor.'); return; }
+      render(data);
+    })
+    .catch(function (err) {
+      showError('No se pudo conectar con el servidor: ' + err.message);
+    });
+
+  function render(data) {
+    var ps     = data.participantes || [];
+    var count  = ps.length;
+    var numeros = ps.map(function (p) { return p.telFmt || p.tel; })
+                   .filter(Boolean).join('\n');
+
+    var filas = ps.map(function (p, i) {
+      var waNum = (p.telFmt || '').replace('+', '');
+      var waBtn = waNum
+        ? '<a href="https://wa.me/' + waNum + '" target="_blank" title="Abrir chat">💬</a>'
+        : '';
+      return '<tr>' +
+        '<td class="num">' + (i + 1) + '</td>' +
+        '<td>' + escHtml(p.nombre) + '</td>' +
+        '<td class="tel">' + escHtml(p.tel) + '</td>' +
+        '<td class="fmt">' + escHtml(p.telFmt) + '</td>' +
+        '<td class="wa">' + waBtn + '</td>' +
+      '</tr>';
+    }).join('');
+
+    app.innerHTML =
+      '<div class="header">' +
+        '<h1>🥾 ' + escHtml(data.caminata) + '</h1>' +
+        '<div class="meta">📅 ' + escHtml(data.fecha) + '</div>' +
+        '<div class="badge">' + count + ' participante' + (count !== 1 ? 's' : '') + '</div>' +
+      '</div>' +
+      '<div class="body">' +
+        '<p class="section-title">Números para el grupo (formato internacional)</p>' +
+        '<textarea id="nums" readonly>' + escHtml(numeros) + '</textarea>' +
+        '<div class="btn-row">' +
+          '<button class="btn" onclick="copiar()">📋 Copiar números</button>' +
+          '<span class="ok-msg" id="ok">✔ ¡Copiado!</span>' +
+        '</div>' +
+
+        '<p class="section-title">Lista de participantes</p>' +
+        '<table>' +
+          '<thead><tr><th>#</th><th>Nombre</th><th>Teléfono</th><th>Internacional</th><th>Chat</th></tr></thead>' +
+          '<tbody>' + filas + '</tbody>' +
+        '</table>' +
+
+        '<div class="tip">' +
+          '💡 <strong>Para crear el grupo:</strong> copia los números → abre WhatsApp → Nuevo grupo → agrega cada número.' +
+        '</div>' +
+      '</div>';
+  }
+
+  function copiar() {
+    var t = document.getElementById('nums');
+    if (!t) return;
+    t.select();
+    t.setSelectionRange(0, 99999);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(t.value).then(flash, function () {
+        document.execCommand('copy'); flash();
+      });
+    } else {
+      document.execCommand('copy'); flash();
+    }
+  }
+  window.copiar = copiar;
+
+  function flash() {
+    var o = document.getElementById('ok');
+    if (!o) return;
+    o.style.display = 'inline';
+    setTimeout(function () { o.style.display = 'none'; }, 2500);
+  }
+
+  function escHtml(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+})();
+</script>
+</body>
+</html>
