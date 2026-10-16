@@ -105,20 +105,6 @@
     background: #b0a0cc;
     cursor: default;
   }
-  /* Botón "pagar más tarde" */
-  .btn-saltar {
-    background: transparent;
-    color: #5c6b62;
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1px solid #cfd8d3;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .btn-saltar:hover { background: #f5f5f5; }
 
   /* Ícono de confirmación de pago */
   .pago-confirmado-icono { font-size: 52px; margin-bottom: 8px; }
@@ -220,9 +206,6 @@
         💳 Ir a pagar con Wompi
       </button>
       <div id="hint-monto-wompi" style="display:none; font-size:12.5px; color:#5c6b62; text-align:center; margin-top:6px; padding:6px 10px; background:#f7f9f7; border-radius:6px; border:1px solid #e1e7e3;"></div>
-      <button class="btn-saltar" id="btn-saltar-pago">
-        Pagar más tarde
-      </button>
     </div>
 
     <!-- PASO 4: confirmación final -->
@@ -685,12 +668,6 @@
       alert('Error preparando el pago: ' + err.message);
     });
   }
-
-  /** Clic en "Pagar más tarde" → saltar al paso final sin pago. */
-  document.getElementById('btn-saltar-pago').addEventListener('click', function() {
-    document.getElementById('paso-pago').classList.add('oculto');
-    mostrarPasoFinal(false, false);
-  });
 
   // ── Paso 4 – confirmación final ────────────────────────────────────────────
 
