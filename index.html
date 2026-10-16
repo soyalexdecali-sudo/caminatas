@@ -551,8 +551,8 @@
     });
   }
 
-  /** Clic en "Ir a pagar con Wompi" → redirigir a la pasarela con el monto. */
-  document.getElementById('btn-ir-wompi').addEventListener('click', function() {
+  /** Clic en "Ir a pagar con Wompi" → pre-guarda en PREINSCRITO y redirige a la pasarela. */
+  document.getElementById('btn-ir-wompi').addEventListener('click', async function() {
     const selected = document.querySelector('input[name="opcion-pago"]:checked');
     if (!selected) return;
 
@@ -576,6 +576,27 @@
 
     // Referencia única para Wompi: doc_caminata_monto
     const referencia = docRegistrado + '_' + FECHA.replace(/-/g, '') + '_' + valor;
+
+    // ── PRE-REGISTRO: guardar datos en PREINSCRITO antes de ir a Wompi ───────
+    // Así los datos quedan seguros aunque el pago falle, se cierre la ventana
+    // o el banco (PSE) demore en confirmar. El webhook de Wompi los moverá
+    // a "Respuestas de formulario 1" cuando el pago sea confirmado.
+    try {
+      const pendingStr = localStorage.getItem('_pendingReg');
+      if (pendingStr) {
+        const preReg = JSON.parse(pendingStr);
+        preReg.valor = valor;   // valor exacto según la opción elegida
+        await fetch(API_URL, {
+          method:  'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body:    JSON.stringify(preReg)
+        });
+      }
+    } catch(ePreReg) {
+      console.warn('Pre-registro PREINSCRITO no completado:', ePreReg);
+      // No bloqueamos el pago si falla el pre-registro
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Si hay clave pública Wompi configurada, usar checkout dinámico (monto auto)
     // De lo contrario usar el link estático (el usuario deberá confirmar el monto en Wompi)
