@@ -116,19 +116,6 @@
     .tel { font-family: 'Courier New', monospace; }
     .fmt { font-family: 'Courier New', monospace; color: #1b4332; }
     .wa  { text-align: center; }
-    .wa a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px; height: 32px;
-      background: #25D366;
-      border-radius: 50%;
-      color: #fff;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: background .15s;
-    }
-    .wa a:hover { background: #1ebe5b; }
 
     .tip {
       margin-top: 20px;
@@ -140,6 +127,59 @@
       color: #1b4332;
       line-height: 1.5;
     }
+
+    /* Invite link field */
+    .invite-row {
+      margin-bottom: 4px;
+    }
+    .invite-row input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #c8e6c9;
+      border-radius: 8px;
+      font-size: .9rem;
+      color: #1b4332;
+      outline: none;
+      margin-bottom: 4px;
+    }
+    .invite-row input:focus { border-color: #40916c; }
+    .hint {
+      display: block;
+      font-size: .78rem;
+      color: #5a8a6a;
+      line-height: 1.4;
+    }
+
+    /* Invite / chat action buttons */
+    .wa-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      background: #25D366;
+      border-radius: 50%;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background .15s;
+    }
+    .wa-circle:hover { background: #1ebe5b; }
+
+    .wa-invite {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #25D366;
+      color: #fff;
+      text-decoration: none;
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .wa-invite:hover { background: #1ebe5b; }
 
     /* Loading / error states */
     .state {
@@ -215,17 +255,15 @@
     var numeros = ps.map(function (p) { return p.telFmt || p.tel; })
                    .filter(Boolean).join('\n');
 
+    // Construye filas — los botones se actualizan dinámicamente con actualizarBotones()
     var filas = ps.map(function (p, i) {
       var waNum = (p.telFmt || '').replace('+', '');
-      var waBtn = waNum
-        ? '<a href="https://wa.me/' + waNum + '" target="_blank" title="Abrir chat">💬</a>'
-        : '';
       return '<tr>' +
         '<td class="num">' + (i + 1) + '</td>' +
         '<td>' + escHtml(p.nombre) + '</td>' +
         '<td class="tel">' + escHtml(p.tel) + '</td>' +
         '<td class="fmt">' + escHtml(p.telFmt) + '</td>' +
-        '<td class="wa">' + waBtn + '</td>' +
+        '<td class="wa" id="btn-' + i + '" data-wa="' + escHtml(waNum) + '"></td>' +
       '</tr>';
     }).join('');
 
@@ -236,24 +274,59 @@
         '<div class="badge">' + count + ' participante' + (count !== 1 ? 's' : '') + '</div>' +
       '</div>' +
       '<div class="body">' +
-        '<p class="section-title">Números para el grupo (formato internacional)</p>' +
+
+        // ── Link de invitación (opcional) ──────────────────────
+        '<p class="section-title">🔗 Link de invitación al grupo (opcional)</p>' +
+        '<div class="invite-row">' +
+          '<input id="inviteLink" type="url" placeholder="Pega aquí el link https://chat.whatsapp.com/..." ' +
+                 'oninput="actualizarBotones()" />' +
+          '<span class="hint">Crea el grupo en WhatsApp → ⋮ → Enlace de invitación → Copiar link</span>' +
+        '</div>' +
+
+        // ── Números ─────────────────────────────────────────────
+        '<p class="section-title" style="margin-top:18px">Números (formato internacional)</p>' +
         '<textarea id="nums" readonly>' + escHtml(numeros) + '</textarea>' +
         '<div class="btn-row">' +
           '<button class="btn" onclick="copiar()">📋 Copiar números</button>' +
           '<span class="ok-msg" id="ok">✔ ¡Copiado!</span>' +
         '</div>' +
 
+        // ── Tabla ────────────────────────────────────────────────
         '<p class="section-title">Lista de participantes</p>' +
         '<table>' +
-          '<thead><tr><th>#</th><th>Nombre</th><th>Teléfono</th><th>Internacional</th><th>Chat</th></tr></thead>' +
+          '<thead><tr><th>#</th><th>Nombre</th><th>Teléfono</th><th>Internacional</th><th>Acción</th></tr></thead>' +
           '<tbody>' + filas + '</tbody>' +
         '</table>' +
 
-        '<div class="tip">' +
-          '💡 <strong>Para crear el grupo:</strong> copia los números → abre WhatsApp → Nuevo grupo → agrega cada número.' +
+        '<div class="tip" id="tip">' +
+          '💡 <strong>Paso 1:</strong> Crea el grupo en WhatsApp desde tu <strong>celular</strong> (puedes ingresar el número directamente aunque no sea contacto).<br>' +
+          '&nbsp;&nbsp;&nbsp;<strong>Paso 2:</strong> Pega el link de invitación arriba → usa el botón <strong>📨 Invitar</strong> de cada participante para enviarles el link por WhatsApp.' +
         '</div>' +
       '</div>';
+
+    // Renderiza botones según el link
+    actualizarBotones();
   }
+
+  // Actualiza los botones de acción de cada fila
+  window.actualizarBotones = function () {
+    var link = (document.getElementById('inviteLink') || {}).value || '';
+    link = link.trim();
+    document.querySelectorAll('td[data-wa]').forEach(function (td) {
+      var waNum = td.getAttribute('data-wa');
+      if (!waNum) { td.innerHTML = ''; return; }
+      if (link) {
+        // Modo invitación: envía el link por WA
+        td.innerHTML =
+          '<a href="https://wa.me/' + waNum + '?text=' + encodeURIComponent(link) +
+          '" target="_blank" title="Enviar link del grupo" class="wa-invite">📨 Invitar</a>';
+      } else {
+        // Modo chat: abre conversación directa
+        td.innerHTML =
+          '<a href="https://wa.me/' + waNum + '" target="_blank" title="Abrir chat" class="wa-circle">💬</a>';
+      }
+    });
+  };
 
   function copiar() {
     var t = document.getElementById('nums');
