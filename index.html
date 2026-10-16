@@ -5,853 +5,826 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Registro de caminata</title>
 <style>
-* { box-sizing: border-box; }
-body {
-font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-background: #f2f5f3;
-margin: 0;
-padding: 24px 16px 60px;
-color: #1f2a24;
-}
-.card {
-max-width: 520px;
-margin: 0 auto;
-background: #fff;
-border-radius: 12px;
-padding: 28px 24px;
-box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-}
-h1 { font-size: 20px; margin: 0 0 4px; color: #2e5d3f; }
-.subtitulo { font-size: 14px; color: #5c6b62; margin: 0 0 20px; }
-label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 4px; }
-input[type=text], input[type=tel], input[type=email], input[type=date], select, textarea {
-width: 100%; padding: 10px 12px; border: 1px solid #cfd8d3;
-border-radius: 8px; font-size: 15px; background: #fff; font-family: inherit;
-}
-input:focus, select:focus { outline: 2px solid #2e5d3f; border-color: #2e5d3f; }
-button {
-cursor: pointer; border: none; border-radius: 8px;
-padding: 12px 18px; font-size: 15px; font-weight: 600;
-}
-.btn-primario { background: #2e5d3f; color: #fff; width: 100%; margin-top: 22px; }
-.btn-primario:disabled { background: #9db6a5; cursor: default; }
-.oculto { display: none; }
-.aviso { font-size: 13px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; }
-.aviso-ok { background: #e6f4ea; color: #2e5d3f; }
-.aviso-error { background: #fdecea; color: #a13a2c; }
-.aviso-info { background: #e3f2fd; color: #1565c0; border-left: 3px solid #1976d2; }
-.aviso-pago {
-background: #e8f5e9; border-left: 4px solid #2e5d3f;
-color: #1b5e20; padding: 14px 16px; border-radius: 6px; margin-top: 16px;
-font-size: 13.5px; line-height: 1.6; text-align: left;
-}
-.consentimiento {
-font-size: 12.5px; line-height: 1.5; color: #4a564e;
-background: #f7f9f7; border: 1px solid #e1e7e3; border-radius: 8px;
-padding: 12px; max-height: 160px; overflow-y: auto; margin-top: 18px;
-}
-.fila-check { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
-.fila-check input { width: auto; margin-top: 3px; flex-shrink: 0; }
-.fila-check label { margin: 0; font-weight: 500; font-size: 13px; }
-.pantalla-final { text-align: center; padding: 30px 10px; }
-.cerrado-icono { font-size: 48px; margin-bottom: 8px; }
-.cargando-wrap { text-align: center; padding: 24px 0; color: #5c6b62; font-size: 14px; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f2f5f3;
+    margin: 0;
+    padding: 24px 16px 60px;
+    color: #1f2a24;
+  }
+  .card {
+    max-width: 520px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; color: #2e5d3f; }
+  .subtitulo { font-size: 14px; color: #5c6b62; margin: 0 0 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 4px; }
+  input[type=text], input[type=tel], input[type=email], input[type=date], select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #cfd8d3;
+    border-radius: 8px; font-size: 15px; background: #fff; font-family: inherit;
+  }
+  input:focus, select:focus { outline: 2px solid #2e5d3f; border-color: #2e5d3f; }
+  button {
+    cursor: pointer; border: none; border-radius: 8px;
+    padding: 12px 18px; font-size: 15px; font-weight: 600;
+  }
+  .btn-primario { background: #2e5d3f; color: #fff; width: 100%; margin-top: 22px; }
+  .btn-primario:disabled { background: #9db6a5; cursor: default; }
+  .oculto { display: none; }
+  .aviso { font-size: 13px; padding: 10px 12px; border-radius: 8px; margin-top: 12px; }
+  .aviso-ok { background: #e6f4ea; color: #2e5d3f; }
+  .aviso-error { background: #fdecea; color: #a13a2c; }
+  .aviso-info { background: #e3f2fd; color: #1565c0; border-left: 3px solid #1976d2; }
+  .aviso-pago {
+    background: #e8f5e9; border-left: 4px solid #2e5d3f;
+    color: #1b5e20; padding: 14px 16px; border-radius: 6px; margin-top: 16px;
+    font-size: 13.5px; line-height: 1.6; text-align: left;
+  }
+  .consentimiento {
+    font-size: 12.5px; line-height: 1.5; color: #4a564e;
+    background: #f7f9f7; border: 1px solid #e1e7e3; border-radius: 8px;
+    padding: 12px; max-height: 160px; overflow-y: auto; margin-top: 18px;
+  }
+  .fila-check { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
+  .fila-check input { width: auto; margin-top: 3px; flex-shrink: 0; }
+  .fila-check label { margin: 0; font-weight: 500; font-size: 13px; }
+  .pantalla-final { text-align: center; padding: 30px 10px; }
+  .cerrado-icono { font-size: 48px; margin-bottom: 8px; }
+  .cargando-wrap { text-align: center; padding: 24px 0; color: #5c6b62; font-size: 14px; }
 
-/* ── Opciones de pago Wompi ─────────────────────────────── */
-.opcion-pago {
-display: flex;
-align-items: center;
-gap: 10px;
-padding: 12px 14px;
-border: 2px solid #cfd8d3;
-border-radius: 8px;
-margin: 8px 0;
-cursor: pointer;
-transition: border-color 0.15s, background 0.15s;
-font-weight: 500;
-font-size: 14px;
-}
-.opcion-pago input[type=radio] {
-width: auto;
-flex-shrink: 0;
-accent-color: #2e5d3f;
-width: 18px; height: 18px;
-}
-.opcion-seleccionada {
-border-color: #2e5d3f;
-background: #e8f5e9;
-}
-.opcion-precio {
-margin-left: auto;
-font-weight: 700;
-color: #2e5d3f;
-font-size: 15px;
-white-space: nowrap;
-}
+  /* ── Opciones de pago Wompi ─────────────────────────────── */
+  .opcion-pago {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 2px solid #cfd8d3;
+    border-radius: 8px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .opcion-pago input[type=radio] {
+    width: auto;
+    flex-shrink: 0;
+    accent-color: #2e5d3f;
+    width: 18px; height: 18px;
+  }
+  .opcion-seleccionada {
+    border-color: #2e5d3f;
+    background: #e8f5e9;
+  }
+  .opcion-precio {
+    margin-left: auto;
+    font-weight: 700;
+    color: #2e5d3f;
+    font-size: 15px;
+    white-space: nowrap;
+  }
 
-/* Botón Wompi (morado corporativo) */
-.btn-wompi {
-background: #6c2dc7;
-color: #fff;
-width: 100%;
-margin-top: 18px;
-padding: 14px;
-font-size: 16px;
-border-radius: 8px;
-border: none;
-cursor: pointer;
-}
-.btn-wompi:disabled {
-background: #b0a0cc;
-cursor: default;
-}
-/* Ícono de confirmación de pago */
-.pago-confirmado-icono { font-size: 52px; margin-bottom: 8px; }
+  /* Botón Wompi (morado corporativo) */
+  .btn-wompi {
+    background: #6c2dc7;
+    color: #fff;
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-wompi:disabled {
+    background: #b0a0cc;
+    cursor: default;
+  }
+  /* Botón "pagar más tarde" */
+  .btn-saltar {
+    background: transparent;
+    color: #5c6b62;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #cfd8d3;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .btn-saltar:hover { background: #f5f5f5; }
+
+  /* Ícono de confirmación de pago */
+  .pago-confirmado-icono { font-size: 52px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
-<div class="card">
-<h1>Registro para la caminata</h1>
-<p class="subtitulo" id="titulo-evento">Cargando...</p>
+  <div class="card">
+    <h1>Registro para la caminata</h1>
+    <p class="subtitulo" id="titulo-evento">Cargando...</p>
 
-<!-- CARGANDO -->
-<div id="paso-cargando" class="cargando-wrap">
-Verificando disponibilidad&hellip;
-</div>
+    <!-- CARGANDO -->
+    <div id="paso-cargando" class="cargando-wrap">
+      Verificando disponibilidad&hellip;
+    </div>
 
-<!-- INSCRIPCIONES CERRADAS -->
-<div id="paso-cerrado" class="oculto pantalla-final">
-<div class="cerrado-icono">🚫</div>
-<h1 style="color:#b71c1c;">Inscripciones cerradas</h1>
-<p class="subtitulo" id="msg-cerrado">Esta caminata ha alcanzado su capacidad máxima de participantes.</p>
-</div>
+    <!-- INSCRIPCIONES CERRADAS -->
+    <div id="paso-cerrado" class="oculto pantalla-final">
+      <div class="cerrado-icono">🚫</div>
+      <h1 style="color:#b71c1c;">Inscripciones cerradas</h1>
+      <p class="subtitulo" id="msg-cerrado">Esta caminata ha alcanzado su capacidad máxima de participantes.</p>
+    </div>
 
-<!-- PASO 1: buscar por documento -->
-<div id="paso-buscar" class="oculto">
-<label for="in-documento">Número de documento de identidad *</label>
-<input type="text" id="in-documento" inputmode="numeric" placeholder="Ej: 121154541">
-<button class="btn-primario" id="btn-buscar">Continuar</button>
-<div id="msg-buscar"></div>
-</div>
+    <!-- PASO 1: buscar por documento -->
+    <div id="paso-buscar" class="oculto">
+      <label for="in-documento">Número de documento de identidad *</label>
+      <input type="text" id="in-documento" inputmode="numeric" placeholder="Ej: 121154541">
+      <button class="btn-primario" id="btn-buscar">Continuar</button>
+      <div id="msg-buscar"></div>
+    </div>
 
-<!-- PASO 2: formulario -->
-<form id="form-datos" class="oculto">
-<div id="msg-encontrado"></div>
+    <!-- PASO 2: formulario -->
+    <form id="form-datos" class="oculto">
+      <div id="msg-encontrado"></div>
 
-<label for="f-nombre">Nombre y Apellidos *</label>
-<input type="text" id="f-nombre" required>
+      <label for="f-nombre">Nombre y Apellidos *</label>
+      <input type="text" id="f-nombre" required>
 
-<label for="f-tipo-doc">Tipo de documento de Identidad *</label>
-<select id="f-tipo-doc" required>
-<option value="">Selecciona...</option>
-<option>Cédula de ciudadania</option>
-<option>Pasaporte</option>
-<option>Cédula de extrangeria</option>
-<option>Registro civil</option>
-<option>Tarjeta de Identidad</option>
-</select>
+      <label for="f-tipo-doc">Tipo de documento de Identidad *</label>
+      <select id="f-tipo-doc" required>
+        <option value="">Selecciona...</option>
+        <option>Cédula de ciudadania</option>
+        <option>Pasaporte</option>
+        <option>Cédula de extrangeria</option>
+        <option>Registro civil</option>
+        <option>Tarjeta de Identidad</option>
+      </select>
 
-<label for="f-doc">Número de documento de Identidad *</label>
-<input type="text" id="f-doc" required readonly>
+      <label for="f-doc">Número de documento de Identidad *</label>
+      <input type="text" id="f-doc" required readonly>
 
-<label for="f-nacimiento">Fecha de Nacimiento *</label>
-<input type="date" id="f-nacimiento" required>
+      <label for="f-nacimiento">Fecha de Nacimiento *</label>
+      <input type="date" id="f-nacimiento" required>
 
-<label for="f-telefono">Teléfono de contacto personal *</label>
-<input type="tel" id="f-telefono" required>
+      <label for="f-telefono">Teléfono de contacto personal *</label>
+      <input type="tel" id="f-telefono" required>
 
-<label for="f-correo">Correo electrónico</label>
-<input type="email" id="f-correo">
+      <label for="f-correo">Correo electrónico</label>
+      <input type="email" id="f-correo">
 
-<label for="f-sangre">Grupo Sanguíneo *</label>
-<input type="text" id="f-sangre" required placeholder="Ej: O+">
+      <label for="f-sangre">Grupo Sanguíneo *</label>
+      <input type="text" id="f-sangre" required placeholder="Ej: O+">
 
-<label for="f-salud">¿Tiene cobertura de salud? Indica sí/no y tu EPS si aplica *</label>
-<textarea id="f-salud" rows="2" required></textarea>
+      <label for="f-salud">¿Tiene cobertura de salud? Indica sí/no y tu EPS si aplica *</label>
+      <textarea id="f-salud" rows="2" required></textarea>
 
-<label for="f-contacto-nombre">Nombre de un contacto de emergencia</label>
-<input type="text" id="f-contacto-nombre">
+      <label for="f-contacto-nombre">Nombre de un contacto de emergencia</label>
+      <input type="text" id="f-contacto-nombre">
 
-<label for="f-contacto-telefono">Teléfono del contacto de emergencia</label>
-<input type="tel" id="f-contacto-telefono">
+      <label for="f-contacto-telefono">Teléfono del contacto de emergencia</label>
+      <input type="tel" id="f-contacto-telefono">
 
-<!-- Transporte particular -->
-<div class="fila-check" style="margin-top: 18px;">
-<input type="checkbox" id="f-transporte">
-<label for="f-transporte">¿Requiere transporte particular para esta caminata?</label>
-</div>
+      <!-- Transporte particular -->
+      <div class="fila-check" style="margin-top: 18px;">
+        <input type="checkbox" id="f-transporte">
+        <label for="f-transporte">¿Requiere transporte particular para esta caminata?</label>
+      </div>
 
-<div class="consentimiento" id="texto-consentimiento"></div>
-<div class="fila-check">
-<input type="checkbox" id="f-acepta" required>
-<label for="f-acepta">He leído y acepto las condiciones anteriores.</label>
-</div>
+      <div class="consentimiento" id="texto-consentimiento"></div>
+      <div class="fila-check">
+        <input type="checkbox" id="f-acepta" required>
+        <label for="f-acepta">He leído y acepto las condiciones anteriores.</label>
+      </div>
 
-<button type="submit" class="btn-primario" id="btn-enviar">Enviar registro</button>
-<div id="msg-enviar"></div>
-</form>
+      <button type="submit" class="btn-primario" id="btn-enviar">Enviar registro</button>
+      <div id="msg-enviar"></div>
+    </form>
 
-<!-- PASO 3: selección de pago Wompi -->
-<div id="paso-pago" class="oculto">
-<div id="aviso-ya-inscrito" class="aviso aviso-info" style="display:none;margin-bottom:14px;">
-ℹ️ <strong>Ya tienes un registro para esta caminata.</strong> Completa el pago para confirmar tu lugar.
-</div>
-<h2 style="color:#2e5d3f;font-size:17px;margin:0 0 6px;">💳 Selecciona tu opción de pago</h2>
-<p style="font-size:13px;color:#5c6b62;margin:0 0 16px;">
-Elige la opción que mejor se adapte a lo que necesitas para esta caminata.
-</p>
-<div id="opciones-pago-lista"></div>
-<button class="btn-wompi" id="btn-ir-wompi" disabled>
-💳 Ir a pagar con Wompi
-</button>
-<div id="hint-monto-wompi" style="display:none; font-size:12.5px; color:#5c6b62; text-align:center; margin-top:6px; padding:6px 10px; background:#f7f9f7; border-radius:6px; border:1px solid #e1e7e3;"></div>
-</div>
+    <!-- PASO 3: selección de pago Wompi -->
+    <div id="paso-pago" class="oculto">
+      <div id="aviso-ya-inscrito" class="aviso aviso-info" style="display:none;margin-bottom:14px;">
+        ℹ️ <strong>Ya tienes un registro para esta caminata.</strong> Completa el pago para confirmar tu lugar.
+      </div>
+      <h2 style="color:#2e5d3f;font-size:17px;margin:0 0 6px;">💳 Selecciona tu opción de pago</h2>
+      <p style="font-size:13px;color:#5c6b62;margin:0 0 16px;">
+        Elige la opción que mejor se adapte a lo que necesitas para esta caminata.
+      </p>
+      <div id="opciones-pago-lista"></div>
+      <button class="btn-wompi" id="btn-ir-wompi" disabled>
+        💳 Ir a pagar con Wompi
+      </button>
+      <div id="hint-monto-wompi" style="display:none; font-size:12.5px; color:#5c6b62; text-align:center; margin-top:6px; padding:6px 10px; background:#f7f9f7; border-radius:6px; border:1px solid #e1e7e3;"></div>
+      <button class="btn-saltar" id="btn-saltar-pago">
+        Pagar más tarde
+      </button>
+    </div>
 
-<!-- PASO 4: confirmación final -->
-<div id="paso-final" class="oculto pantalla-final">
-<div id="icono-final" style="font-size:48px;margin-bottom:8px;">✅</div>
-<h1 id="titulo-final">¡Listo!</h1>
-<p class="subtitulo" id="msg-final"></p>
-<div id="msg-pago" class="aviso-pago" style="display:none;"></div>
-</div>
-</div>
+    <!-- PASO 4: confirmación final -->
+    <div id="paso-final" class="oculto pantalla-final">
+      <div id="icono-final" style="font-size:48px;margin-bottom:8px;">✅</div>
+      <h1 id="titulo-final">¡Listo!</h1>
+      <p class="subtitulo" id="msg-final"></p>
+      <div id="msg-pago" class="aviso-pago" style="display:none;"></div>
+    </div>
+  </div>
 
 <script>
-// URL de tu Web App de Apps Script (backend).
-const API_URL = 'https://script.google.com/macros/s/AKfycby9NPt5iV1at6NAGQpXirEN3TJQD0fXvMzMGnP70tQTfIK5_poBSqNJnQCQPVHViP6V/exec';
-
-const params = new URLSearchParams(window.location.search);
-const CAMINATA = params.get('caminata') || 'Caminata';
-const FECHA = params.get('fecha') || '';
-const TIPO = (params.get('tipo') || 'gratuita').toLowerCase();
-const SEGURO = (params.get('seguro') || 'no').toLowerCase();
-const VALOR = params.get('valor') || '';
-
-document.getElementById('titulo-evento').textContent =
-CAMINATA + (FECHA ? ' · ' + FECHA : '');
-
-// CONFIG cargado al inicio desde el backend
-let CONFIG = { ok: false, formasPago: [], opcionesPago: [], cerrado: false, limite: 0, inscritosCount: 0 };
-
-// Documento del participante recién registrado (necesario para Wompi)
-let docRegistrado = '';
-
-// ── FIX: respaldo en memoria de los datos del formulario ──────────────────
-// Si localStorage está bloqueado (modo incógnito, configuración del navegador,
-// etc.), los datos del formulario se conservan aquí mientras la página está
-// abierta, garantizando que el pre-registro en PREINSCRITO siempre se envíe
-// al hacer clic en "Ir a pagar con Wompi".
-let pendingRegData = null;
-
-// ── Utilidades ─────────────────────────────────────────────────────────────
-function escapeHtml(str) {
-return String(str || '')
-.replace(/&/g, '&amp;').replace(/</g, '&lt;')
-.replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-/** Formatea un número en pesos colombianos: $5.000 */
-function formatCOP(n) {
-return '$' + (parseInt(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
-
-// ── Consentimiento ─────────────────────────────────────────────────────────
-function construirConsentimiento() {
-let parteCosto;
-if (TIPO === 'pagada') {
-const montoTexto = VALOR ? (' de $' + VALOR) : '';
-parteCosto = 'La participación en esta caminata tiene un costo' + montoTexto +
-', el cual debe ser cancelado según las indicaciones del organizador. La actividad se ' +
-'desarrolla en un entorno natural y puede implicar riesgos propios de este tipo de recorridos ' +
-'(caídas, resbalones, golpes, lesiones, picaduras, condiciones climáticas, dificultades del ' +
-'terreno u otras situaciones imprevistas). El participante declara haber sido informado de ' +
-'estos riesgos y participar de forma libre y voluntaria.';
-} else {
-parteCosto = 'La participación en esta caminata es gratuita, voluntaria y bajo la ' +
-'responsabilidad de cada participante. La actividad se desarrolla en un entorno natural y ' +
-'puede implicar riesgos propios de este tipo de recorridos (caídas, resbalones, golpes, ' +
-'lesiones, picaduras, condiciones climáticas, dificultades del terreno u otras situaciones ' +
-'imprevistas). El participante declara haber sido informado de estos riesgos y participar de ' +
-'forma libre y voluntaria.';
-}
-
-let parteSeguro;
-if (SEGURO === 'si') {
-parteSeguro = 'Esta actividad cuenta con seguro contra accidentes para los participantes ' +
-'registrados; sin embargo, dicha cobertura no exime a cada persona de evaluar sus propias ' +
-'condiciones físicas y de salud, ni de tomar las medidas de prevención que considere necesarias.';
-} else {
-parteSeguro = 'El participante comprende que la actividad no cuenta con seguro individual de ' +
-'accidentes. Cada persona es responsable de evaluar sus propias condiciones y tomar las ' +
-'medidas de prevención que considere necesarias.';
-}
-
-const cierre = 'Quien invita o acompaña a otro participante no asume responsabilidad por las ' +
-'decisiones, condiciones físicas, comportamiento, seguridad o eventuales accidentes de esa ' +
-'persona por el solo hecho de invitarla o acompañarla. El participante se compromete a actuar ' +
-'de forma responsable y a seguir las instrucciones de los organizadores.';
-
-const autorizacionImagen = 'Adicionalmente, el participante autoriza expresamente el uso de ' +
-'fotografías y/o videos en los que aparezca, tomados durante esta actividad, exclusivamente ' +
-'para fines de registro y publicidad de las caminatas del grupo.';
-
-document.getElementById('texto-consentimiento').innerHTML =
-'<strong>Consentimiento y responsabilidad del participante.</strong> ' +
-parteCosto + ' ' + parteSeguro + ' ' + cierre + ' ' + autorizacionImagen;
-}
-
-construirConsentimiento();
-
-// ── iniciar ────────────────────────────────────────────────────────────────
-async function iniciar() {
-// ¿Regresa del pago Wompi?
-if (params.get('wompi_pago') === '1') {
-await manejarRetornoWompi();
-return;
-}
-
-try {
-const resp = await fetch(
-API_URL +
-'?accion=config' +
-'&caminata=' + encodeURIComponent(CAMINATA) +
-'&fecha=' + encodeURIComponent(FECHA)
-);
-CONFIG = await resp.json();
-} catch (e) {
-CONFIG = { ok: false, formasPago: [], opcionesPago: [], cerrado: false };
-}
-
-document.getElementById('paso-cargando').classList.add('oculto');
-
-if (CONFIG.cerrado) {
-const msgCerrado = document.getElementById('msg-cerrado');
-if (CONFIG.limite > 0) {
-msgCerrado.textContent =
-'Esta caminata ya alcanzó su cupo máximo de ' + CONFIG.limite +
-' participantes. ¡Gracias por tu interés!';
-}
-document.getElementById('paso-cerrado').classList.remove('oculto');
-} else {
-document.getElementById('paso-buscar').classList.remove('oculto');
-}
-}
-
-// ── Paso 1 – búsqueda por documento ───────────────────────────────────────
-const elBuscar = document.getElementById('btn-buscar');
-const elDocBusqueda = document.getElementById('in-documento');
-const elMsgBuscar = document.getElementById('msg-buscar');
-const elPasoBuscar = document.getElementById('paso-buscar');
-const elForm = document.getElementById('form-datos');
-const elMsgEncontrado = document.getElementById('msg-encontrado');
-const elPasoFinal = document.getElementById('paso-final');
-
-elBuscar.addEventListener('click', async function () {
-const doc = elDocBusqueda.value.trim();
-if (!doc) {
-elMsgBuscar.innerHTML = '<div class="aviso aviso-error">Escribe tu número de documento.</div>';
-return;
-}
-elBuscar.disabled = true;
-elMsgBuscar.innerHTML = 'Buscando...';
-
-try {
-const resp = await fetch(
-API_URL + '?accion=buscar&documento=' + encodeURIComponent(doc) +
-'&caminata=' + encodeURIComponent(CAMINATA) +
-'&fecha=' + encodeURIComponent(FECHA)
-);
-const data = await resp.json();
-elBuscar.disabled = false;
-elMsgBuscar.innerHTML = '';
-
-if (data.yaInscrito) {
-// Persona ya inscrita en esta caminata
-docRegistrado = doc;
-elPasoBuscar.classList.add('oculto');
-if (data.yaPago) {
-// Inscrita y pagada → pantalla de confirmación
-document.getElementById('icono-final').textContent = '🎉';
-document.getElementById('titulo-final').textContent = '¡Ya confirmado!';
-document.getElementById('msg-final').textContent =
-'Tu inscripción y pago para ' + CAMINATA + ' ya están registrados. ¡Nos vemos en la caminata!';
-document.getElementById('msg-pago').style.display = 'none';
-elPasoFinal.classList.remove('oculto');
-} else if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
-// Inscrita sin pagar, caminata pagada → paso de pago con aviso
-document.getElementById('aviso-ya-inscrito').style.display = 'block';
-renderizarOpcionesPago();
-document.getElementById('paso-pago').classList.remove('oculto');
-} else {
-// Inscrita, caminata gratuita → pantalla final
-document.getElementById('icono-final').textContent = '✅';
-document.getElementById('titulo-final').textContent = '¡Ya estás inscrito!';
-document.getElementById('msg-final').textContent =
-'Tu inscripción para ' + CAMINATA + ' ya estaba registrada. ¡Nos vemos en la caminata!';
-document.getElementById('msg-pago').style.display = 'none';
-elPasoFinal.classList.remove('oculto');
-}
-} else {
-mostrarFormulario(doc, data.caminante);
-}
-} catch (err) {
-elBuscar.disabled = false;
-elMsgBuscar.innerHTML = '<div class="aviso aviso-error">Ocurrió un error buscando tus datos. Intenta de nuevo.</div>';
-}
-});
-
-function mostrarFormulario(doc, caminante) {
-document.getElementById('f-doc').value = doc;
-
-if (caminante) {
-elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Encontramos tus datos de una caminata anterior. Revisa y corrige lo que haya cambiado.</div>';
-document.getElementById('f-nombre').value = caminante.nombre || '';
-document.getElementById('f-tipo-doc').value = caminante.tipoDocumento || '';
-document.getElementById('f-nacimiento').value = caminante.fechaNacimiento || '';
-document.getElementById('f-telefono').value = caminante.telefono || '';
-document.getElementById('f-correo').value = caminante.correo || '';
-document.getElementById('f-sangre').value = caminante.grupoSanguineo || '';
-document.getElementById('f-salud').value = caminante.salud || '';
-document.getElementById('f-contacto-nombre').value = caminante.contactoNombre || '';
-document.getElementById('f-contacto-telefono').value= caminante.contactoTelefono || '';
-} else {
-elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Es tu primer registro. Completa tus datos.</div>';
-}
-
-elPasoBuscar.classList.add('oculto');
-elForm.classList.remove('oculto');
-}
-
-// ── Paso 2 – envío del formulario ──────────────────────────────────────────
-elForm.addEventListener('submit', async function (e) {
-e.preventDefault();
-const btnEnviar = document.getElementById('btn-enviar');
-const msgEnviar = document.getElementById('msg-enviar');
-
-const datos = {
-numeroDocumento: document.getElementById('f-doc').value.trim(),
-tipoDocumento: document.getElementById('f-tipo-doc').value,
-nombre: document.getElementById('f-nombre').value.trim(),
-fechaNacimiento: document.getElementById('f-nacimiento').value,
-telefono: document.getElementById('f-telefono').value.trim(),
-correo: document.getElementById('f-correo').value.trim(),
-grupoSanguineo: document.getElementById('f-sangre').value.trim(),
-salud: document.getElementById('f-salud').value.trim(),
-contactoNombre: document.getElementById('f-contacto-nombre').value.trim(),
-contactoTelefono: document.getElementById('f-contacto-telefono').value.trim(),
-requiereTransporte: document.getElementById('f-transporte').checked,
-aceptaConsentimiento: document.getElementById('f-acepta').checked,
-caminata: CAMINATA,
-fecha: FECHA,
-tipo: CONFIG.tipo || TIPO,
-seguro: SEGURO,
-valor: VALOR
-};
-
-if (!datos.aceptaConsentimiento) {
-msgEnviar.innerHTML = '<div class="aviso aviso-error">Debes aceptar las condiciones para continuar.</div>';
-return;
-}
-
-btnEnviar.disabled = true;
-
-// ── Caminata PAGADA: guardar datos localmente y proceder al pago ─────────
-// El registro solo se envía al servidor DESPUÉS de confirmar el pago Wompi.
-if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
-docRegistrado = datos.numeroDocumento;
-// FIX: guardar en memoria (pendingRegData) Y en localStorage.
-// Si localStorage falla, pendingRegData garantiza que el pre-registro
-// en PREINSCRITO siempre se envíe al hacer clic en "Ir a pagar con Wompi".
-pendingRegData = datos;
-try { localStorage.setItem('_pendingReg', JSON.stringify(datos)); } catch(e) {}
-elForm.classList.add('oculto');
-renderizarOpcionesPago();
-document.getElementById('paso-pago').classList.remove('oculto');
-return;
-}
-
-// ── Caminata GRATUITA: enviar al servidor directamente ────────────────────
-msgEnviar.innerHTML = 'Guardando...';
-
-try {
-// text/plain evita el preflight CORS que Apps Script no responde bien
-const resp = await fetch(API_URL, {
-method: 'POST',
-headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-body: JSON.stringify(datos)
-});
-const data = await resp.json();
-
-// Registro duplicado detectado en el servidor
-if (data.yaInscrito) {
-docRegistrado = datos.numeroDocumento;
-elForm.classList.add('oculto');
-if (data.yaPago) {
-document.getElementById('icono-final').textContent = '🎉';
-document.getElementById('titulo-final').textContent = '¡Ya confirmado!';
-document.getElementById('msg-final').textContent =
-'Tu inscripción y pago para ' + CAMINATA + ' ya están registrados. ¡Nos vemos en la caminata!';
-document.getElementById('msg-pago').style.display = 'none';
-elPasoFinal.classList.remove('oculto');
-} else {
-document.getElementById('icono-final').textContent = '✅';
-document.getElementById('titulo-final').textContent = '¡Ya estás inscrito!';
-document.getElementById('msg-final').textContent =
-'Tu inscripción para ' + CAMINATA + ' ya estaba registrada. ¡Nos vemos en la caminata!';
-document.getElementById('msg-pago').style.display = 'none';
-elPasoFinal.classList.remove('oculto');
-}
-return;
-}
-
-if (!data.ok) throw new Error(data.error || 'Error desconocido');
-
-docRegistrado = datos.numeroDocumento;
-elForm.classList.add('oculto');
-mostrarPasoFinal(false, false);
-} catch (err) {
-btnEnviar.disabled = false;
-msgEnviar.innerHTML =
-'<div class="aviso aviso-error">No se pudo guardar. ' +
-escapeHtml(err.message || 'Intenta de nuevo.') + '</div>';
-}
-});
-
-// ── Paso 3 – selección de pago Wompi ──────────────────────────────────────
-
-/** Dibuja los radio buttons con las opciones de pago. */
-function renderizarOpcionesPago() {
-const lista = document.getElementById('opciones-pago-lista');
-lista.innerHTML = '';
-
-(CONFIG.opcionesPago || []).forEach(function(op, i) {
-const id = 'opcion-pago-' + i;
-const label = document.createElement('label');
-label.className = 'opcion-pago';
-label.htmlFor = id;
-
-const radio = document.createElement('input');
-radio.type = 'radio';
-radio.name = 'opcion-pago';
-radio.id = id;
-radio.value = String(op.valor);
-
-const textoDesc = document.createTextNode(op.descripcion);
-const spanPrecio = document.createElement('span');
-spanPrecio.className = 'opcion-precio';
-spanPrecio.textContent = formatCOP(op.valor);
-
-label.appendChild(radio);
-label.appendChild(textoDesc);
-label.appendChild(spanPrecio);
-lista.appendChild(label);
-
-radio.addEventListener('change', function() {
-const btnW = document.getElementById('btn-ir-wompi');
-btnW.disabled = false;
-btnW.innerHTML = '💳 Pagar ' + formatCOP(op.valor) + ' con Wompi';
-document.getElementById('hint-monto-wompi').innerHTML =
-'📌 Valor a pagar en Wompi: <strong>' + formatCOP(op.valor) + '</strong>';
-document.getElementById('hint-monto-wompi').style.display = 'block';
-// Resaltar la opción seleccionada
-lista.querySelectorAll('.opcion-pago').forEach(function(l) {
-l.classList.remove('opcion-seleccionada');
-});
-label.classList.add('opcion-seleccionada');
-});
-});
-}
-
-/** Clic en "Ir a pagar con Wompi" → pre-guarda en PREINSCRITO y redirige a la pasarela. */
-document.getElementById('btn-ir-wompi').addEventListener('click', async function() {
-const selected = document.querySelector('input[name="opcion-pago"]:checked');
-if (!selected) return;
-
-const valor = parseInt(selected.value);
-const centavos = valor * 100;
-
-// URL de retorno después del pago (la misma página con contexto)
-const baseUrl = window.location.origin + window.location.pathname;
-const retorno = new URLSearchParams({
-caminata: CAMINATA,
-fecha: FECHA,
-tipo: CONFIG.tipo || TIPO,
-seguro: SEGURO,
-doc: docRegistrado,
-centavos: String(centavos),
-wompi_pago: '1'
-});
-if (VALOR) retorno.set('valor', VALOR);
-
-const redirectUrl = baseUrl + '?' + retorno.toString();
-
-// Referencia única para Wompi: doc_caminata_monto
-const referencia = docRegistrado + '_' + FECHA.replace(/-/g, '') + '_' + valor;
-
-// ── PRE-REGISTRO: guardar datos en PREINSCRITO antes de ir a Wompi ───────
-// FIX: usa pendingRegData (memoria) como fuente principal y localStorage
-// como respaldo. Así el pre-registro siempre se envía aunque el storage
-// esté bloqueado, y los datos quedan seguros en PREINSCRITO antes de pagar.
-try {
-const preReg = pendingRegData
-? Object.assign({}, pendingRegData)
-: (() => {
-try { return JSON.parse(localStorage.getItem('_pendingReg') || 'null'); } catch(e) { return null; }
-})();
-if (preReg) {
-preReg.valor = valor; // valor exacto según la opción elegida
-await fetch(API_URL, {
-method: 'POST',
-headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-body: JSON.stringify(preReg)
-});
-}
-} catch(ePreReg) {
-console.warn('Pre-registro PREINSCRITO no completado:', ePreReg);
-// No bloqueamos el pago si falla el pre-registro
-}
-// ─────────────────────────────────────────────────────────────────────────
-
-// Si hay clave pública Wompi configurada, usar checkout dinámico (monto auto)
-// De lo contrario usar el link estático (el usuario deberá confirmar el monto en Wompi)
-if (CONFIG.wompiPublicKey) {
-abrirWompiCheckout(CONFIG.wompiPublicKey, centavos, referencia, redirectUrl);
-} else {
-// Construir link de Wompi con parámetros
-const wompiUrl = CONFIG.wompiLink +
-'?amount-in-cents=' + centavos +
-'&currency=COP' +
-'&redirect-url=' + encodeURIComponent(redirectUrl) +
-'&reference=' + encodeURIComponent(referencia);
-window.location.href = wompiUrl;
-}
-});
-
-/**
-* Abre el checkout de Wompi via API programática (WidgetCheckout).
-*
-* Flujo:
-* 1. Pide la firma de integridad al Apps Script (?accion=wompifirma).
-* 2. Carga widget.js UNA SOLA VEZ (sin data-render para no consumir token).
-* 3. Abre el checkout con `new WidgetCheckout({ integrity, ... })`.
-*
-* La firma evita "Firma de integridad requerida no enviada".
-* Cargar el script solo una vez evita "token de aceptación ya fue usado".
-*/
-var _wompiScriptCargado = false;
-
-function abrirWompiCheckout(publicKey, centavos, referencia, redirectUrl) {
-
-// ── Paso 1: obtener firma de integridad desde el servidor ─────────────
-fetch(
-API_URL +
-'?accion=wompifirma' +
-'&centavos=' + encodeURIComponent(centavos) +
-'&referencia=' + encodeURIComponent(referencia)
-)
-.then(function(r) { return r.json(); })
-.then(function(data) {
-if (!data.ok) throw new Error(data.error || 'Error generando firma Wompi');
-var firma = data.firma;
-
-// ── Paso 2: función que abre el checkout con la firma ───────────────
-function _abrirCheckout() {
-var checkout = new WidgetCheckout({
-currency: 'COP',
-amountInCents: centavos,
-reference: referencia,
-publicKey: publicKey,
-redirectUrl: redirectUrl,
-'signature:integrity': firma // campo correcto en la API programática de Wompi
-});
-
-checkout.open(function(result) {
-// Wompi redirige automáticamente vía redirectUrl al aprobar.
-// Este callback es respaldo por si la redirección no ocurre.
-if (result && result.transaction && result.transaction.status === 'APPROVED') {
-var baseUrl = window.location.origin + window.location.pathname;
-var p = new URLSearchParams({
-caminata: CAMINATA, fecha: FECHA, tipo: TIPO, seguro: SEGURO,
-doc: docRegistrado, centavos: String(centavos), wompi_pago: '1',
-status: 'APPROVED', id: result.transaction.id
-});
-if (VALOR) p.set('valor', VALOR);
-window.location.href = baseUrl + '?' + p.toString();
-}
-});
-}
-
-// ── Paso 3: cargar widget.js una sola vez (solo la clase, sin botón) ─
-if (_wompiScriptCargado && typeof WidgetCheckout !== 'undefined') {
-_abrirCheckout();
-} else {
-var script = document.createElement('script');
-script.src = 'https://checkout.wompi.co/widget.js';
-script.onload = function() {
-_wompiScriptCargado = true;
-_abrirCheckout();
-};
-script.onerror = function() {
-alert('No se pudo cargar el módulo de pago. Verifica tu conexión e intenta de nuevo.');
-};
-document.head.appendChild(script);
-}
-})
-.catch(function(err) {
-alert('Error preparando el pago: ' + err.message);
-});
-}
-
-// ── Paso 4 – confirmación final ────────────────────────────────────────────
-
-/**
-* Muestra la pantalla de confirmación final.
-* @param {boolean} pagadoConWompi true si viene de un pago exitoso con Wompi.
-* @param {number|false} centavosPagados monto en centavos (solo si pagadoConWompi=true).
-*/
-function mostrarPasoFinal(pagadoConWompi, centavosPagados) {
-const divPago = document.getElementById('msg-pago');
-
-if (pagadoConWompi) {
-document.getElementById('icono-final').textContent = '🎉';
-document.getElementById('titulo-final').textContent = '¡Pago confirmado!';
-document.getElementById('msg-final').textContent =
-'Tu inscripción para ' + CAMINATA + ' está completa. ¡Nos vemos en la caminata!';
-divPago.innerHTML =
-'<strong>✅ Pago registrado:</strong> ' + formatCOP(centavosPagados / 100) +
-'. Tu lugar está confirmado.';
-divPago.style.display = 'block';
-} else {
-document.getElementById('icono-final').textContent = '✅';
-document.getElementById('titulo-final').textContent = '¡Listo!';
-document.getElementById('msg-final').textContent =
-'Tu registro para ' + CAMINATA + ' quedó guardado. ' +
-(CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0
-? 'Recuerda completar el pago para confirmar tu lugar.'
-: 'Nos vemos en la caminata.');
-
-// Solo mostrar bloque de pago si la caminata es pagada (hay opciones Wompi)
-if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
-divPago.innerHTML = '<strong>💳 Opciones de pago disponibles:</strong><br>' +
-CONFIG.opcionesPago.map(function(op) {
-return escapeHtml(op.descripcion) + ': <strong>' + formatCOP(op.valor) + '</strong>';
-}).join('<br>') +
-'<br><em style="font-size:12px;">Contacta al organizador para coordinar el pago.</em>';
-divPago.style.display = 'block';
-} else {
-divPago.style.display = 'none';
-}
-}
-
-elPasoFinal.classList.remove('oculto');
-}
-
-// ── Retorno desde Wompi ────────────────────────────────────────────────────
-
-/**
-* Llamada cuando la URL tiene wompi_pago=1.
-* Wompi agrega ?id=TXN_ID&status=APPROVED (o DECLINED/VOIDED) a la redirect-url.
-*/
-async function manejarRetornoWompi() {
-const cargando = document.getElementById('paso-cargando');
-cargando.textContent = 'Verificando tu pago…';
-
-// Limpiar la URL para evitar re-procesamiento al refrescar
-const urlLimpia = window.location.origin + window.location.pathname +
-'?caminata=' + encodeURIComponent(CAMINATA) +
-'&fecha=' + encodeURIComponent(FECHA) +
-(TIPO ? '&tipo=' + encodeURIComponent(TIPO) : '') +
-(SEGURO ? '&seguro=' + encodeURIComponent(SEGURO) : '') +
-(VALOR ? '&valor=' + encodeURIComponent(VALOR) : '');
-history.replaceState(null, '', urlLimpia);
-
-const doc = params.get('doc') || '';
-const centavos = parseInt(params.get('centavos')) || 0;
-const status = (params.get('status') || '').toUpperCase();
-
-// Pago no aprobado
-if (status !== 'APPROVED') {
-cargando.classList.add('oculto');
-document.getElementById('icono-final').textContent = '⚠️';
-document.getElementById('titulo-final').textContent = 'Pago no completado';
-document.getElementById('msg-final').textContent =
-'El pago no fue completado. Puedes intentarlo de nuevo desde el inicio.';
-const divPago = document.getElementById('msg-pago');
-divPago.innerHTML =
-'Estado Wompi: <strong>' + escapeHtml(status || 'cancelado') + '</strong>. ' +
-'Documento registrado: <strong>' + escapeHtml(doc) + '</strong>.';
-divPago.style.display = 'block';
-elPasoFinal.classList.remove('oculto');
-return;
-}
-
-// Pago aprobado → registrar o confirmar en la hoja de cálculo
-var pendingReg = null;
-try { pendingReg = JSON.parse(localStorage.getItem('_pendingReg') || 'null'); } catch(e) {}
-
-try {
-var data;
-if (pendingReg) {
-// Nueva inscripción: enviar formulario + confirmación de pago juntos
-pendingReg.wompiPagado = true;
-pendingReg.centavos = centavos;
-const resp = await fetch(API_URL, {
-method: 'POST',
-headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-body: JSON.stringify(pendingReg)
-});
-data = await resp.json();
-try { localStorage.removeItem('_pendingReg'); } catch(e) {}
-} else {
-// Inscripción existente o localStorage no disponible:
-// confirmar pago usando los datos ya guardados en PREINSCRITO
-const resp = await fetch(
-API_URL +
-'?accion=confirmarpago' +
-'&doc=' + encodeURIComponent(doc) +
-'&caminata=' + encodeURIComponent(CAMINATA) +
-'&fecha=' + encodeURIComponent(FECHA) +
-'&centavos=' + encodeURIComponent(centavos)
-);
-data = await resp.json();
-}
-
-cargando.classList.add('oculto');
-
-if (data.ok || data.yaInscrito) {
-mostrarPasoFinal(true, centavos);
-} else {
-document.getElementById('icono-final').textContent = '⚠️';
-document.getElementById('titulo-final').textContent = 'Pago recibido';
-document.getElementById('msg-final').textContent =
-'Wompi procesó el pago correctamente, pero hubo un problema al registrarlo. ' +
-'Informa al organizador tu número de documento.';
-const divPago = document.getElementById('msg-pago');
-divPago.innerHTML =
-'Documento: <strong>' + escapeHtml(doc) + '</strong> · ' +
-'Monto: <strong>' + formatCOP(centavos / 100) + '</strong><br>' +
-'<em>Detalle: ' + escapeHtml(data.error || 'error desconocido') + '</em>';
-divPago.style.display = 'block';
-elPasoFinal.classList.remove('oculto');
-}
-} catch (err) {
-cargando.classList.add('oculto');
-document.getElementById('icono-final').textContent = '⚠️';
-document.getElementById('titulo-final').textContent = 'Pago posiblemente realizado';
-document.getElementById('msg-final').textContent =
-'No pudimos verificar el pago por un error de red. ' +
-'Informa al organizador tu número de documento.';
-const divPago = document.getElementById('msg-pago');
-divPago.innerHTML =
-'Documento: <strong>' + escapeHtml(doc) + '</strong> · ' +
-'Monto esperado: <strong>' + formatCOP(centavos / 100) + '</strong>';
-divPago.style.display = 'block';
-elPasoFinal.classList.remove('oculto');
-}
-}
-
-// ── Arrancar ───────────────────────────────────────────────────────────────
-iniciar();
+  // URL de tu Web App de Apps Script (backend).
+  const API_URL = 'https://script.google.com/macros/s/AKfycby9NPt5iV1at6NAGQpXirEN3TJQD0fXvMzMGnP70tQTfIK5_poBSqNJnQCQPVHViP6V/exec';
+
+  const params   = new URLSearchParams(window.location.search);
+  const CAMINATA = params.get('caminata') || 'Caminata';
+  const FECHA    = params.get('fecha')    || '';
+  const TIPO     = (params.get('tipo')   || 'gratuita').toLowerCase();
+  const SEGURO   = (params.get('seguro') || 'no').toLowerCase();
+  const VALOR    = params.get('valor')   || '';
+
+  document.getElementById('titulo-evento').textContent =
+    CAMINATA + (FECHA ? ' · ' + FECHA : '');
+
+  // CONFIG cargado al inicio desde el backend
+  let CONFIG = { ok: false, formasPago: [], opcionesPago: [], cerrado: false, limite: 0, inscritosCount: 0 };
+
+  // Documento del participante recién registrado (necesario para Wompi)
+  let docRegistrado = '';
+
+  // ── Utilidades ─────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /** Formatea un número en pesos colombianos: $5.000 */
+  function formatCOP(n) {
+    return '$' + (parseInt(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  // ── Consentimiento ─────────────────────────────────────────────────────────
+  function construirConsentimiento() {
+    let parteCosto;
+    if (TIPO === 'pagada') {
+      const montoTexto = VALOR ? (' de $' + VALOR) : '';
+      parteCosto = 'La participación en esta caminata tiene un costo' + montoTexto +
+        ', el cual debe ser cancelado según las indicaciones del organizador. La actividad se ' +
+        'desarrolla en un entorno natural y puede implicar riesgos propios de este tipo de recorridos ' +
+        '(caídas, resbalones, golpes, lesiones, picaduras, condiciones climáticas, dificultades del ' +
+        'terreno u otras situaciones imprevistas). El participante declara haber sido informado de ' +
+        'estos riesgos y participar de forma libre y voluntaria.';
+    } else {
+      parteCosto = 'La participación en esta caminata es gratuita, voluntaria y bajo la ' +
+        'responsabilidad de cada participante. La actividad se desarrolla en un entorno natural y ' +
+        'puede implicar riesgos propios de este tipo de recorridos (caídas, resbalones, golpes, ' +
+        'lesiones, picaduras, condiciones climáticas, dificultades del terreno u otras situaciones ' +
+        'imprevistas). El participante declara haber sido informado de estos riesgos y participar de ' +
+        'forma libre y voluntaria.';
+    }
+
+    let parteSeguro;
+    if (SEGURO === 'si') {
+      parteSeguro = 'Esta actividad cuenta con seguro contra accidentes para los participantes ' +
+        'registrados; sin embargo, dicha cobertura no exime a cada persona de evaluar sus propias ' +
+        'condiciones físicas y de salud, ni de tomar las medidas de prevención que considere necesarias.';
+    } else {
+      parteSeguro = 'El participante comprende que la actividad no cuenta con seguro individual de ' +
+        'accidentes. Cada persona es responsable de evaluar sus propias condiciones y tomar las ' +
+        'medidas de prevención que considere necesarias.';
+    }
+
+    const cierre = 'Quien invita o acompaña a otro participante no asume responsabilidad por las ' +
+      'decisiones, condiciones físicas, comportamiento, seguridad o eventuales accidentes de esa ' +
+      'persona por el solo hecho de invitarla o acompañarla. El participante se compromete a actuar ' +
+      'de forma responsable y a seguir las instrucciones de los organizadores.';
+
+    const autorizacionImagen = 'Adicionalmente, el participante autoriza expresamente el uso de ' +
+      'fotografías y/o videos en los que aparezca, tomados durante esta actividad, exclusivamente ' +
+      'para fines de registro y publicidad de las caminatas del grupo.';
+
+    document.getElementById('texto-consentimiento').innerHTML =
+      '<strong>Consentimiento y responsabilidad del participante.</strong> ' +
+      parteCosto + ' ' + parteSeguro + ' ' + cierre + ' ' + autorizacionImagen;
+  }
+
+  construirConsentimiento();
+
+  // ── iniciar ────────────────────────────────────────────────────────────────
+  async function iniciar() {
+    // ¿Regresa del pago Wompi?
+    if (params.get('wompi_pago') === '1') {
+      await manejarRetornoWompi();
+      return;
+    }
+
+    try {
+      const resp = await fetch(
+        API_URL +
+        '?accion=config' +
+        '&caminata=' + encodeURIComponent(CAMINATA) +
+        '&fecha='    + encodeURIComponent(FECHA)
+      );
+      CONFIG = await resp.json();
+    } catch (e) {
+      CONFIG = { ok: false, formasPago: [], opcionesPago: [], cerrado: false };
+    }
+
+    document.getElementById('paso-cargando').classList.add('oculto');
+
+    if (CONFIG.cerrado) {
+      const msgCerrado = document.getElementById('msg-cerrado');
+      if (CONFIG.limite > 0) {
+        msgCerrado.textContent =
+          'Esta caminata ya alcanzó su cupo máximo de ' + CONFIG.limite +
+          ' participantes. ¡Gracias por tu interés!';
+      }
+      document.getElementById('paso-cerrado').classList.remove('oculto');
+    } else {
+      document.getElementById('paso-buscar').classList.remove('oculto');
+    }
+  }
+
+  // ── Paso 1 – búsqueda por documento ───────────────────────────────────────
+  const elBuscar         = document.getElementById('btn-buscar');
+  const elDocBusqueda    = document.getElementById('in-documento');
+  const elMsgBuscar      = document.getElementById('msg-buscar');
+  const elPasoBuscar     = document.getElementById('paso-buscar');
+  const elForm           = document.getElementById('form-datos');
+  const elMsgEncontrado  = document.getElementById('msg-encontrado');
+  const elPasoFinal      = document.getElementById('paso-final');
+
+  elBuscar.addEventListener('click', async function () {
+    const doc = elDocBusqueda.value.trim();
+    if (!doc) {
+      elMsgBuscar.innerHTML = '<div class="aviso aviso-error">Escribe tu número de documento.</div>';
+      return;
+    }
+    elBuscar.disabled = true;
+    elMsgBuscar.innerHTML = 'Buscando...';
+
+    try {
+      const resp = await fetch(
+        API_URL + '?accion=buscar&documento=' + encodeURIComponent(doc) +
+        '&caminata=' + encodeURIComponent(CAMINATA) +
+        '&fecha='    + encodeURIComponent(FECHA)
+      );
+      const data = await resp.json();
+      elBuscar.disabled = false;
+      elMsgBuscar.innerHTML = '';
+
+      if (data.yaInscrito) {
+        // Persona ya inscrita en esta caminata
+        docRegistrado = doc;
+        elPasoBuscar.classList.add('oculto');
+        if (data.yaPago) {
+          // Inscrita y pagada → pantalla de confirmación
+          document.getElementById('icono-final').textContent = '🎉';
+          document.getElementById('titulo-final').textContent = '¡Ya confirmado!';
+          document.getElementById('msg-final').textContent =
+            'Tu inscripción y pago para ' + CAMINATA + ' ya están registrados. ¡Nos vemos en la caminata!';
+          document.getElementById('msg-pago').style.display = 'none';
+          elPasoFinal.classList.remove('oculto');
+        } else if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
+          // Inscrita sin pagar, caminata pagada → paso de pago con aviso
+          document.getElementById('aviso-ya-inscrito').style.display = 'block';
+          renderizarOpcionesPago();
+          document.getElementById('paso-pago').classList.remove('oculto');
+        } else {
+          // Inscrita, caminata gratuita → pantalla final
+          document.getElementById('icono-final').textContent = '✅';
+          document.getElementById('titulo-final').textContent = '¡Ya estás inscrito!';
+          document.getElementById('msg-final').textContent =
+            'Tu inscripción para ' + CAMINATA + ' ya estaba registrada. ¡Nos vemos en la caminata!';
+          document.getElementById('msg-pago').style.display = 'none';
+          elPasoFinal.classList.remove('oculto');
+        }
+      } else {
+        mostrarFormulario(doc, data.caminante);
+      }
+    } catch (err) {
+      elBuscar.disabled = false;
+      elMsgBuscar.innerHTML = '<div class="aviso aviso-error">Ocurrió un error buscando tus datos. Intenta de nuevo.</div>';
+    }
+  });
+
+  function mostrarFormulario(doc, caminante) {
+    document.getElementById('f-doc').value = doc;
+
+    if (caminante) {
+      elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Encontramos tus datos de una caminata anterior. Revisa y corrige lo que haya cambiado.</div>';
+      document.getElementById('f-nombre').value           = caminante.nombre           || '';
+      document.getElementById('f-tipo-doc').value         = caminante.tipoDocumento    || '';
+      document.getElementById('f-nacimiento').value       = caminante.fechaNacimiento  || '';
+      document.getElementById('f-telefono').value         = caminante.telefono         || '';
+      document.getElementById('f-correo').value           = caminante.correo           || '';
+      document.getElementById('f-sangre').value           = caminante.grupoSanguineo   || '';
+      document.getElementById('f-salud').value            = caminante.salud            || '';
+      document.getElementById('f-contacto-nombre').value  = caminante.contactoNombre   || '';
+      document.getElementById('f-contacto-telefono').value= caminante.contactoTelefono || '';
+    } else {
+      elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Es tu primer registro. Completa tus datos.</div>';
+    }
+
+    elPasoBuscar.classList.add('oculto');
+    elForm.classList.remove('oculto');
+  }
+
+  // ── Paso 2 – envío del formulario ──────────────────────────────────────────
+  elForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const btnEnviar = document.getElementById('btn-enviar');
+    const msgEnviar = document.getElementById('msg-enviar');
+
+    const datos = {
+      numeroDocumento:    document.getElementById('f-doc').value.trim(),
+      tipoDocumento:      document.getElementById('f-tipo-doc').value,
+      nombre:             document.getElementById('f-nombre').value.trim(),
+      fechaNacimiento:    document.getElementById('f-nacimiento').value,
+      telefono:           document.getElementById('f-telefono').value.trim(),
+      correo:             document.getElementById('f-correo').value.trim(),
+      grupoSanguineo:     document.getElementById('f-sangre').value.trim(),
+      salud:              document.getElementById('f-salud').value.trim(),
+      contactoNombre:     document.getElementById('f-contacto-nombre').value.trim(),
+      contactoTelefono:   document.getElementById('f-contacto-telefono').value.trim(),
+      requiereTransporte: document.getElementById('f-transporte').checked,
+      aceptaConsentimiento: document.getElementById('f-acepta').checked,
+      caminata: CAMINATA,
+      fecha:    FECHA,
+      tipo:     TIPO,
+      seguro:   SEGURO,
+      valor:    VALOR
+    };
+
+    if (!datos.aceptaConsentimiento) {
+      msgEnviar.innerHTML = '<div class="aviso aviso-error">Debes aceptar las condiciones para continuar.</div>';
+      return;
+    }
+
+    btnEnviar.disabled = true;
+    msgEnviar.innerHTML = 'Guardando...';
+
+    try {
+      // text/plain evita el preflight CORS que Apps Script no responde bien
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(datos)
+      });
+      const data = await resp.json();
+
+      // Registro duplicado detectado en el servidor
+      if (data.yaInscrito) {
+        docRegistrado = datos.numeroDocumento;
+        elForm.classList.add('oculto');
+        if (data.yaPago) {
+          document.getElementById('icono-final').textContent = '🎉';
+          document.getElementById('titulo-final').textContent = '¡Ya confirmado!';
+          document.getElementById('msg-final').textContent =
+            'Tu inscripción y pago para ' + CAMINATA + ' ya están registrados. ¡Nos vemos en la caminata!';
+          document.getElementById('msg-pago').style.display = 'none';
+          elPasoFinal.classList.remove('oculto');
+        } else if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
+          document.getElementById('aviso-ya-inscrito').style.display = 'block';
+          renderizarOpcionesPago();
+          document.getElementById('paso-pago').classList.remove('oculto');
+        } else {
+          document.getElementById('icono-final').textContent = '✅';
+          document.getElementById('titulo-final').textContent = '¡Ya estás inscrito!';
+          document.getElementById('msg-final').textContent =
+            'Tu inscripción para ' + CAMINATA + ' ya estaba registrada. ¡Nos vemos en la caminata!';
+          document.getElementById('msg-pago').style.display = 'none';
+          elPasoFinal.classList.remove('oculto');
+        }
+        return;
+      }
+
+      if (!data.ok) throw new Error(data.error || 'Error desconocido');
+
+      // Guardar doc para usarlo en el link de Wompi
+      docRegistrado = datos.numeroDocumento;
+
+      elForm.classList.add('oculto');
+
+      // ¿Tiene opciones de pago Wompi?
+      if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
+        renderizarOpcionesPago();
+        document.getElementById('paso-pago').classList.remove('oculto');
+      } else {
+        // Sin Wompi: mostrar pantalla final con info de pago tradicional
+        mostrarPasoFinal(false, false);
+      }
+    } catch (err) {
+      btnEnviar.disabled = false;
+      msgEnviar.innerHTML =
+        '<div class="aviso aviso-error">No se pudo guardar. ' +
+        escapeHtml(err.message || 'Intenta de nuevo.') + '</div>';
+    }
+  });
+
+  // ── Paso 3 – selección de pago Wompi ──────────────────────────────────────
+
+  /** Dibuja los radio buttons con las opciones de pago. */
+  function renderizarOpcionesPago() {
+    const lista = document.getElementById('opciones-pago-lista');
+    lista.innerHTML = '';
+
+    (CONFIG.opcionesPago || []).forEach(function(op, i) {
+      const id    = 'opcion-pago-' + i;
+      const label = document.createElement('label');
+      label.className   = 'opcion-pago';
+      label.htmlFor     = id;
+
+      const radio = document.createElement('input');
+      radio.type  = 'radio';
+      radio.name  = 'opcion-pago';
+      radio.id    = id;
+      radio.value = String(op.valor);
+
+      const textoDesc  = document.createTextNode(op.descripcion);
+      const spanPrecio = document.createElement('span');
+      spanPrecio.className   = 'opcion-precio';
+      spanPrecio.textContent = formatCOP(op.valor);
+
+      label.appendChild(radio);
+      label.appendChild(textoDesc);
+      label.appendChild(spanPrecio);
+      lista.appendChild(label);
+
+      radio.addEventListener('change', function() {
+        const btnW = document.getElementById('btn-ir-wompi');
+        btnW.disabled = false;
+        btnW.innerHTML = '💳 Pagar ' + formatCOP(op.valor) + ' con Wompi';
+        document.getElementById('hint-monto-wompi').innerHTML =
+          '📌 Valor a pagar en Wompi: <strong>' + formatCOP(op.valor) + '</strong>';
+        document.getElementById('hint-monto-wompi').style.display = 'block';
+        // Resaltar la opción seleccionada
+        lista.querySelectorAll('.opcion-pago').forEach(function(l) {
+          l.classList.remove('opcion-seleccionada');
+        });
+        label.classList.add('opcion-seleccionada');
+      });
+    });
+  }
+
+  /** Clic en "Ir a pagar con Wompi" → redirigir a la pasarela con el monto. */
+  document.getElementById('btn-ir-wompi').addEventListener('click', function() {
+    const selected = document.querySelector('input[name="opcion-pago"]:checked');
+    if (!selected) return;
+
+    const valor    = parseInt(selected.value);
+    const centavos = valor * 100;
+
+    // URL de retorno después del pago (la misma página con contexto)
+    const baseUrl  = window.location.origin + window.location.pathname;
+    const retorno  = new URLSearchParams({
+      caminata: CAMINATA,
+      fecha:    FECHA,
+      tipo:     TIPO,
+      seguro:   SEGURO,
+      doc:      docRegistrado,
+      centavos: String(centavos),
+      wompi_pago: '1'
+    });
+    if (VALOR) retorno.set('valor', VALOR);
+
+    const redirectUrl = baseUrl + '?' + retorno.toString();
+
+    // Referencia única para Wompi: doc_caminata_monto
+    const referencia = docRegistrado + '_' + FECHA.replace(/-/g, '') + '_' + valor;
+
+    // Si hay clave pública Wompi configurada, usar checkout dinámico (monto auto)
+    // De lo contrario usar el link estático (el usuario deberá confirmar el monto en Wompi)
+    if (CONFIG.wompiPublicKey) {
+      abrirWompiCheckout(CONFIG.wompiPublicKey, centavos, referencia, redirectUrl);
+    } else {
+      // Construir link de Wompi con parámetros
+      const wompiUrl = CONFIG.wompiLink +
+        '?amount-in-cents=' + centavos +
+        '&currency=COP' +
+        '&redirect-url=' + encodeURIComponent(redirectUrl) +
+        '&reference='    + encodeURIComponent(referencia);
+      window.location.href = wompiUrl;
+    }
+  });
+
+  /**
+   * Abre el checkout de Wompi via API programática (WidgetCheckout).
+   *
+   * Flujo:
+   *  1. Pide la firma de integridad al Apps Script (?accion=wompifirma).
+   *  2. Carga widget.js UNA SOLA VEZ (sin data-render para no consumir token).
+   *  3. Abre el checkout con `new WidgetCheckout({ integrity, ... })`.
+   *
+   * La firma evita "Firma de integridad requerida no enviada".
+   * Cargar el script solo una vez evita "token de aceptación ya fue usado".
+   */
+  var _wompiScriptCargado = false;
+
+  function abrirWompiCheckout(publicKey, centavos, referencia, redirectUrl) {
+
+    // ── Paso 1: obtener firma de integridad desde el servidor ─────────────
+    fetch(
+      API_URL +
+      '?accion=wompifirma' +
+      '&centavos='   + encodeURIComponent(centavos) +
+      '&referencia=' + encodeURIComponent(referencia)
+    )
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.ok) throw new Error(data.error || 'Error generando firma Wompi');
+      var firma = data.firma;
+
+      // ── Paso 2: función que abre el checkout con la firma ───────────────
+      function _abrirCheckout() {
+        var checkout = new WidgetCheckout({
+          currency:              'COP',
+          amountInCents:         centavos,
+          reference:             referencia,
+          publicKey:             publicKey,
+          redirectUrl:           redirectUrl,
+          'signature:integrity': firma   // campo correcto en la API programática de Wompi
+        });
+
+        checkout.open(function(result) {
+          // Wompi redirige automáticamente vía redirectUrl al aprobar.
+          // Este callback es respaldo por si la redirección no ocurre.
+          if (result && result.transaction && result.transaction.status === 'APPROVED') {
+            var baseUrl = window.location.origin + window.location.pathname;
+            var p = new URLSearchParams({
+              caminata: CAMINATA, fecha: FECHA, tipo: TIPO, seguro: SEGURO,
+              doc: docRegistrado, centavos: String(centavos), wompi_pago: '1',
+              status: 'APPROVED', id: result.transaction.id
+            });
+            if (VALOR) p.set('valor', VALOR);
+            window.location.href = baseUrl + '?' + p.toString();
+          }
+        });
+      }
+
+      // ── Paso 3: cargar widget.js una sola vez (solo la clase, sin botón) ─
+      if (_wompiScriptCargado && typeof WidgetCheckout !== 'undefined') {
+        _abrirCheckout();
+      } else {
+        var script = document.createElement('script');
+        script.src = 'https://checkout.wompi.co/widget.js';
+        script.onload = function() {
+          _wompiScriptCargado = true;
+          _abrirCheckout();
+        };
+        script.onerror = function() {
+          alert('No se pudo cargar el módulo de pago. Verifica tu conexión e intenta de nuevo.');
+        };
+        document.head.appendChild(script);
+      }
+    })
+    .catch(function(err) {
+      alert('Error preparando el pago: ' + err.message);
+    });
+  }
+
+  /** Clic en "Pagar más tarde" → saltar al paso final sin pago. */
+  document.getElementById('btn-saltar-pago').addEventListener('click', function() {
+    document.getElementById('paso-pago').classList.add('oculto');
+    mostrarPasoFinal(false, false);
+  });
+
+  // ── Paso 4 – confirmación final ────────────────────────────────────────────
+
+  /**
+   * Muestra la pantalla de confirmación final.
+   * @param {boolean} pagadoConWompi  true si viene de un pago exitoso con Wompi.
+   * @param {number|false} centavosPagados  monto en centavos (solo si pagadoConWompi=true).
+   */
+  function mostrarPasoFinal(pagadoConWompi, centavosPagados) {
+    const divPago = document.getElementById('msg-pago');
+
+    if (pagadoConWompi) {
+      document.getElementById('icono-final').textContent = '🎉';
+      document.getElementById('titulo-final').textContent = '¡Pago confirmado!';
+      document.getElementById('msg-final').textContent =
+        'Tu inscripción para ' + CAMINATA + ' está completa. ¡Nos vemos en la caminata!';
+      divPago.innerHTML =
+        '<strong>✅ Pago registrado:</strong> ' + formatCOP(centavosPagados / 100) +
+        '. Tu lugar está confirmado.';
+      divPago.style.display = 'block';
+    } else {
+      document.getElementById('icono-final').textContent = '✅';
+      document.getElementById('titulo-final').textContent = '¡Listo!';
+      document.getElementById('msg-final').textContent =
+        'Tu registro para ' + CAMINATA + ' quedó guardado. ' +
+        (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0
+          ? 'Recuerda completar el pago para confirmar tu lugar.'
+          : 'Nos vemos en la caminata.');
+
+      // Solo mostrar bloque de pago si la caminata es pagada (hay opciones Wompi)
+      if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
+        divPago.innerHTML = '<strong>💳 Opciones de pago disponibles:</strong><br>' +
+          CONFIG.opcionesPago.map(function(op) {
+            return escapeHtml(op.descripcion) + ': <strong>' + formatCOP(op.valor) + '</strong>';
+          }).join('<br>') +
+          '<br><em style="font-size:12px;">Contacta al organizador para coordinar el pago.</em>';
+        divPago.style.display = 'block';
+      } else {
+        divPago.style.display = 'none';
+      }
+    }
+
+    elPasoFinal.classList.remove('oculto');
+  }
+
+  // ── Retorno desde Wompi ────────────────────────────────────────────────────
+
+  /**
+   * Llamada cuando la URL tiene wompi_pago=1.
+   * Wompi agrega ?id=TXN_ID&status=APPROVED (o DECLINED/VOIDED) a la redirect-url.
+   */
+  async function manejarRetornoWompi() {
+    const cargando = document.getElementById('paso-cargando');
+    cargando.textContent = 'Verificando tu pago…';
+
+    // Limpiar la URL para evitar re-procesamiento al refrescar
+    const urlLimpia = window.location.origin + window.location.pathname +
+      '?caminata=' + encodeURIComponent(CAMINATA) +
+      '&fecha='    + encodeURIComponent(FECHA) +
+      (TIPO   ? '&tipo='   + encodeURIComponent(TIPO)   : '') +
+      (SEGURO ? '&seguro=' + encodeURIComponent(SEGURO) : '') +
+      (VALOR  ? '&valor='  + encodeURIComponent(VALOR)  : '');
+    history.replaceState(null, '', urlLimpia);
+
+    const doc      = params.get('doc')      || '';
+    const centavos = parseInt(params.get('centavos')) || 0;
+    const status   = (params.get('status') || '').toUpperCase();
+
+    // Pago no aprobado
+    if (status !== 'APPROVED') {
+      cargando.classList.add('oculto');
+      document.getElementById('icono-final').textContent = '⚠️';
+      document.getElementById('titulo-final').textContent = 'Pago no completado';
+      document.getElementById('msg-final').textContent =
+        'Tu inscripción quedó guardada, pero el pago no fue procesado. ' +
+        'Contacta al organizador para coordinar el pago.';
+      const divPago = document.getElementById('msg-pago');
+      divPago.innerHTML =
+        'Estado Wompi: <strong>' + escapeHtml(status || 'cancelado') + '</strong>. ' +
+        'Documento registrado: <strong>' + escapeHtml(doc) + '</strong>.';
+      divPago.style.display = 'block';
+      elPasoFinal.classList.remove('oculto');
+      return;
+    }
+
+    // Pago aprobado → confirmar en la hoja de cálculo
+    try {
+      const resp = await fetch(
+        API_URL +
+        '?accion=confirmarpago' +
+        '&doc='      + encodeURIComponent(doc) +
+        '&caminata=' + encodeURIComponent(CAMINATA) +
+        '&fecha='    + encodeURIComponent(FECHA) +
+        '&centavos=' + encodeURIComponent(centavos)
+      );
+      const data = await resp.json();
+
+      cargando.classList.add('oculto');
+
+      if (data.ok) {
+        mostrarPasoFinal(true, centavos);
+      } else {
+        // El pago fue aprobado por Wompi pero no pudimos registrarlo en la hoja
+        document.getElementById('icono-final').textContent = '⚠️';
+        document.getElementById('titulo-final').textContent = 'Pago recibido';
+        document.getElementById('msg-final').textContent =
+          'Wompi procesó el pago correctamente, pero hubo un problema al registrarlo. ' +
+          'Informa al organizador tu número de documento.';
+        const divPago = document.getElementById('msg-pago');
+        divPago.innerHTML =
+          'Documento: <strong>' + escapeHtml(doc) + '</strong> · ' +
+          'Monto: <strong>' + formatCOP(centavos / 100) + '</strong><br>' +
+          '<em>Detalle: ' + escapeHtml(data.error || 'error desconocido') + '</em>';
+        divPago.style.display = 'block';
+        elPasoFinal.classList.remove('oculto');
+      }
+    } catch (err) {
+      cargando.classList.add('oculto');
+      document.getElementById('icono-final').textContent = '⚠️';
+      document.getElementById('titulo-final').textContent = 'Pago posiblemente realizado';
+      document.getElementById('msg-final').textContent =
+        'No pudimos verificar el pago por un error de red. ' +
+        'Informa al organizador tu número de documento.';
+      const divPago = document.getElementById('msg-pago');
+      divPago.innerHTML =
+        'Documento: <strong>' + escapeHtml(doc) + '</strong> · ' +
+        'Monto esperado: <strong>' + formatCOP(centavos / 100) + '</strong>';
+      divPago.style.display = 'block';
+      elPasoFinal.classList.remove('oculto');
+    }
+  }
+
+  // ── Arrancar ───────────────────────────────────────────────────────────────
+  iniciar();
 </script>
 </body>
 </html>
