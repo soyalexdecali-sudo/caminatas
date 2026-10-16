@@ -635,12 +635,14 @@
         checkout.open(function(result) {
           // Wompi redirige automáticamente vía redirectUrl al aprobar.
           // Este callback es respaldo por si la redirección no ocurre.
-          if (result && result.transaction && result.transaction.status === 'APPROVED') {
+          // IMPORTANTE: PSE es asíncrono → puede regresar con status PENDING.
+          var txnStatus = (result && result.transaction) ? (result.transaction.status || '') : '';
+          if (txnStatus === 'APPROVED' || txnStatus === 'PENDING') {
             var baseUrl = window.location.origin + window.location.pathname;
             var p = new URLSearchParams({
               caminata: CAMINATA, fecha: FECHA, tipo: TIPO, seguro: SEGURO,
               doc: docRegistrado, centavos: String(centavos), wompi_pago: '1',
-              status: 'APPROVED', id: result.transaction.id
+              status: txnStatus, id: (result.transaction.id || '')
             });
             if (VALOR) p.set('valor', VALOR);
             window.location.href = baseUrl + '?' + p.toString();
@@ -736,17 +738,39 @@
     const centavos = parseInt(params.get('centavos')) || 0;
     const status   = (params.get('status') || '').toUpperCase();
 
-    // Pago no aprobado
-    if (status !== 'APPROVED') {
+    // ── Pago en proceso (PSE / ACH): el banco aún no confirmó ────────────────
+    // PSE es asíncrono: Wompi redirige con status=PENDING (o vacío) mientras
+    // el banco procesa. El webhook de Wompi actualizará PAGADA=Sí en la hoja
+    // cuando el banco confirme. NO mostrar "pago no completado".
+    if (status === 'PENDING' || status === '') {
       cargando.classList.add('oculto');
-      document.getElementById('icono-final').textContent = '⚠️';
-      document.getElementById('titulo-final').textContent = 'Pago no completado';
+      document.getElementById('icono-final').textContent = '⏳';
+      document.getElementById('titulo-final').textContent = 'Pago en proceso';
       document.getElementById('msg-final').textContent =
-        'Tu inscripción quedó guardada, pero el pago no fue procesado. ' +
-        'Contacta al organizador para coordinar el pago.';
+        'Tu banco está procesando el débito (PSE). ' +
+        'Esto puede tardar unos minutos. Recibirás un correo de confirmación de Wompi ' +
+        'cuando el pago quede acreditado y tu cupo quedará confirmado automáticamente.';
       const divPago = document.getElementById('msg-pago');
       divPago.innerHTML =
-        'Estado Wompi: <strong>' + escapeHtml(status || 'cancelado') + '</strong>. ' +
+        '📋 Inscripción guardada · Documento: <strong>' + escapeHtml(doc) + '</strong>.<br>' +
+        '<em style="font-size:12px;">Si pasadas 24 horas no recibes confirmación, ' +
+        'comunícate con el organizador indicando tu número de documento.</em>';
+      divPago.style.display = 'block';
+      elPasoFinal.classList.remove('oculto');
+      return;
+    }
+
+    // ── Pago rechazado o cancelado ─────────────────────────────────────────────
+    if (status !== 'APPROVED') {
+      cargando.classList.add('oculto');
+      document.getElementById('icono-final').textContent = '❌';
+      document.getElementById('titulo-final').textContent = 'Pago no completado';
+      document.getElementById('msg-final').textContent =
+        'Tu inscripción quedó guardada, pero el pago fue rechazado o cancelado. ' +
+        'Puedes intentarlo de nuevo o contactar al organizador para coordinar el pago.';
+      const divPago = document.getElementById('msg-pago');
+      divPago.innerHTML =
+        'Estado Wompi: <strong>' + escapeHtml(status) + '</strong>. ' +
         'Documento registrado: <strong>' + escapeHtml(doc) + '</strong>.';
       divPago.style.display = 'block';
       elPasoFinal.classList.remove('oculto');
