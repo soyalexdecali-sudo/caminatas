@@ -436,7 +436,7 @@
       aceptaConsentimiento: document.getElementById('f-acepta').checked,
       caminata: CAMINATA,
       fecha:    FECHA,
-      tipo:     TIPO,
+      tipo:     CONFIG.tipo || TIPO,
       seguro:   SEGURO,
       valor:    VALOR
     };
@@ -564,7 +564,7 @@
     const retorno  = new URLSearchParams({
       caminata: CAMINATA,
       fecha:    FECHA,
-      tipo:     TIPO,
+      tipo:     CONFIG.tipo || TIPO,
       seguro:   SEGURO,
       doc:      docRegistrado,
       centavos: String(centavos),
