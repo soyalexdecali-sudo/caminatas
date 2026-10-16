@@ -576,8 +576,14 @@
 
     const redirectUrl = baseUrl + '?' + retorno.toString();
 
-    // Referencia única para Wompi: doc_caminata_monto
-    const referencia = docRegistrado + '_' + FECHA.replace(/-/g, '') + '_' + valor;
+    // Referencia única para Wompi: doc_YYYYMMDD_HHMMSSmmm_monto
+    // Incluye hora+ms para evitar "referencia ya ha sido usada" en reintentos/PSE
+    const _ahora = new Date();
+    const _ts = String(_ahora.getHours()).padStart(2,'0') +
+                String(_ahora.getMinutes()).padStart(2,'0') +
+                String(_ahora.getSeconds()).padStart(2,'0') +
+                String(_ahora.getMilliseconds()).padStart(3,'0');
+    const referencia = docRegistrado + '_' + FECHA.replace(/-/g, '') + '_' + _ts + '_' + valor;
 
     // Si hay clave pública Wompi configurada, usar checkout dinámico (monto auto)
     // De lo contrario usar el link estático (el usuario deberá confirmar el monto en Wompi)
