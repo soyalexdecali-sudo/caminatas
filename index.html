@@ -28,7 +28,7 @@
     width: 100%; padding: 10px 12px; border: 1px solid #cfd8d3;
     border-radius: 8px; font-size: 15px; background: #fff; font-family: inherit;
   }
-  input:focus, select:focus { outline: 2px solid #2e5d3f; border-color: #2e5d3f; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #2e5d3f; border-color: #2e5d3f; }
   button {
     cursor: pointer; border: none; border-radius: 8px;
     padding: 12px 18px; font-size: 15px; font-weight: 600;
@@ -176,6 +176,12 @@
       <label for="f-contacto-telefono">Teléfono del contacto de emergencia</label>
       <input type="tel" id="f-contacto-telefono">
 
+      <label for="f-alergias">¿Sufre de algún tipo de alergia? Indique cuál *</label>
+      <textarea id="f-alergias" rows="2" required placeholder="Ej: Ninguna / Alergia al polvo, mariscos..."></textarea>
+
+      <label for="f-medicamentos">¿Toma algún medicamento actualmente? Diga cuáles *</label>
+      <textarea id="f-medicamentos" rows="2" required placeholder="Ej: No / Nombre del medicamento y dosis..."></textarea>
+
       <!-- Transporte particular -->
       <div class="fila-check" style="margin-top: 18px;">
         <input type="checkbox" id="f-transporte">
@@ -304,6 +310,20 @@
       return;
     }
 
+    // ── Verificar si la fecha de la caminata ya pasó o es hoy ─────────────────
+    if (FECHA) {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const fechaCaminata = new Date(FECHA + 'T00:00:00');
+      if (fechaCaminata <= hoy) {
+        document.getElementById('paso-cargando').classList.add('oculto');
+        document.getElementById('msg-cerrado').textContent =
+          'Las inscripciones para la caminata ' + CAMINATA + ' ya están cerradas. ¡Hasta la próxima aventura! 🏔️';
+        document.getElementById('paso-cerrado').classList.remove('oculto');
+        return;
+      }
+    }
+
     try {
       const resp = await fetch(
         API_URL +
@@ -408,6 +428,8 @@
       document.getElementById('f-salud').value            = caminante.salud            || '';
       document.getElementById('f-contacto-nombre').value  = caminante.contactoNombre   || '';
       document.getElementById('f-contacto-telefono').value= caminante.contactoTelefono || '';
+      document.getElementById('f-alergias').value         = caminante.alergias         || '';
+      document.getElementById('f-medicamentos').value     = caminante.medicamentos     || '';
     } else {
       elMsgEncontrado.innerHTML = '<div class="aviso aviso-ok">Es tu primer registro. Completa tus datos.</div>';
     }
@@ -433,6 +455,8 @@
       salud:              document.getElementById('f-salud').value.trim(),
       contactoNombre:     document.getElementById('f-contacto-nombre').value.trim(),
       contactoTelefono:   document.getElementById('f-contacto-telefono').value.trim(),
+      alergias:           document.getElementById('f-alergias').value.trim(),
+      medicamentos:       document.getElementById('f-medicamentos').value.trim(),
       requiereTransporte: document.getElementById('f-transporte').checked,
       aceptaConsentimiento: document.getElementById('f-acepta').checked,
       caminata: CAMINATA,
