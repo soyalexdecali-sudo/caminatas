@@ -137,9 +137,6 @@
     <h1>Registro para la caminata</h1>
     <p class="subtitulo" id="titulo-evento">Cargando...</p>
 
-    <!-- INFO CAMINATA: imagen + descripción (se llena desde CONFIG) -->
-    <div id="info-caminata" class="info-caminata oculto"></div>
-
     <!-- CARGANDO -->
     <div id="paso-cargando" class="cargando-wrap">
       Verificando disponibilidad&hellip;
@@ -154,6 +151,8 @@
 
     <!-- PASO 1: buscar por documento -->
     <div id="paso-buscar" class="oculto">
+      <!-- INFO CAMINATA: imagen + descripción (se llena desde CONFIG) -->
+      <div id="info-caminata" class="info-caminata oculto"></div>
       <label for="in-documento">Número de documento de identidad *</label>
       <input type="text" id="in-documento" inputmode="numeric" placeholder="Ej: 121154541">
       <button class="btn-primario" id="btn-buscar">Continuar</button>
