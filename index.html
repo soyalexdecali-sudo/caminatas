@@ -57,6 +57,28 @@
   .cerrado-icono { font-size: 48px; margin-bottom: 8px; }
   .cargando-wrap { text-align: center; padding: 24px 0; color: #5c6b62; font-size: 14px; }
 
+  /* ── Info de la caminata (imagen + descripción) ─────────── */
+  .info-caminata {
+    margin: 0 0 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e1e7e3;
+    background: #f7f9f7;
+  }
+  .info-caminata img {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    display: block;
+  }
+  .info-caminata-desc {
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #3a4a3f;
+    white-space: pre-line;
+  }
+
   /* ── Opciones de pago Wompi ─────────────────────────────── */
   .opcion-pago {
     display: flex;
@@ -114,6 +136,9 @@
   <div class="card">
     <h1>Registro para la caminata</h1>
     <p class="subtitulo" id="titulo-evento">Cargando...</p>
+
+    <!-- INFO CAMINATA: imagen + descripción (se llena desde CONFIG) -->
+    <div id="info-caminata" class="info-caminata oculto"></div>
 
     <!-- CARGANDO -->
     <div id="paso-cargando" class="cargando-wrap">
@@ -255,6 +280,25 @@
     return '$' + (parseInt(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
+  // ── Info de la caminata (imagen + descripción) ─────────────────────────────
+  function mostrarInfoCaminata() {
+    const divInfo = document.getElementById('info-caminata');
+    const imagen      = CONFIG.imagen      || '';
+    const descripcion = CONFIG.descripcion || '';
+
+    if (!imagen && !descripcion) return; // nada que mostrar
+
+    let html = '';
+    if (imagen) {
+      html += '<img src="' + escapeHtml(imagen) + '" alt="' + escapeHtml(CAMINATA) + '" onerror="this.style.display=\'none\'">';
+    }
+    if (descripcion) {
+      html += '<div class="info-caminata-desc">' + escapeHtml(descripcion) + '</div>';
+    }
+    divInfo.innerHTML = html;
+    divInfo.classList.remove('oculto');
+  }
+
   // ── Consentimiento ─────────────────────────────────────────────────────────
   function construirConsentimiento() {
     let parteCosto;
@@ -337,6 +381,9 @@
     }
 
     document.getElementById('paso-cargando').classList.add('oculto');
+
+    // Mostrar imagen y descripción de la caminata (si las hay)
+    mostrarInfoCaminata();
 
     if (CONFIG.cerrado) {
       const msgCerrado = document.getElementById('msg-cerrado');
@@ -626,20 +673,11 @@
 
   /**
    * Abre el checkout de Wompi via API programática (WidgetCheckout).
-   *
-   * Flujo:
-   *  1. Pide la firma de integridad al Apps Script (?accion=wompifirma).
-   *  2. Carga widget.js UNA SOLA VEZ (sin data-render para no consumir token).
-   *  3. Abre el checkout con `new WidgetCheckout({ integrity, ... })`.
-   *
-   * La firma evita "Firma de integridad requerida no enviada".
-   * Cargar el script solo una vez evita "token de aceptación ya fue usado".
    */
   var _wompiScriptCargado = false;
 
   function abrirWompiCheckout(publicKey, centavos, referencia, redirectUrl) {
 
-    // ── Paso 1: obtener firma de integridad desde el servidor ─────────────
     fetch(
       API_URL +
       '?accion=wompifirma' +
@@ -651,7 +689,6 @@
       if (!data.ok) throw new Error(data.error || 'Error generando firma Wompi');
       var firma = data.firma;
 
-      // ── Paso 2: función que abre el checkout con la firma ───────────────
       function _abrirCheckout() {
         var checkout = new WidgetCheckout({
           currency:              'COP',
@@ -659,13 +696,10 @@
           reference:             referencia,
           publicKey:             publicKey,
           redirectUrl:           redirectUrl,
-          'signature:integrity': firma   // campo correcto en la API programática de Wompi
+          'signature:integrity': firma
         });
 
         checkout.open(function(result) {
-          // Wompi redirige automáticamente vía redirectUrl al aprobar.
-          // Este callback es respaldo por si la redirección no ocurre.
-          // IMPORTANTE: PSE es asíncrono → puede regresar con status PENDING.
           var txnStatus = (result && result.transaction) ? (result.transaction.status || '') : '';
           if (txnStatus === 'APPROVED' || txnStatus === 'PENDING') {
             var baseUrl = window.location.origin + window.location.pathname;
@@ -680,7 +714,6 @@
         });
       }
 
-      // ── Paso 3: cargar widget.js una sola vez (solo la clase, sin botón) ─
       if (_wompiScriptCargado && typeof WidgetCheckout !== 'undefined') {
         _abrirCheckout();
       } else {
@@ -703,11 +736,6 @@
 
   // ── Paso 4 – confirmación final ────────────────────────────────────────────
 
-  /**
-   * Muestra la pantalla de confirmación final.
-   * @param {boolean} pagadoConWompi  true si viene de un pago exitoso con Wompi.
-   * @param {number|false} centavosPagados  monto en centavos (solo si pagadoConWompi=true).
-   */
   function mostrarPasoFinal(pagadoConWompi, centavosPagados) {
     const divPago = document.getElementById('msg-pago');
 
@@ -729,7 +757,6 @@
           ? 'Recuerda completar el pago para confirmar tu lugar.'
           : 'Nos vemos en la caminata.');
 
-      // Solo mostrar bloque de pago si la caminata es pagada (hay opciones Wompi)
       if (CONFIG.opcionesPago && CONFIG.opcionesPago.length > 0) {
         divPago.innerHTML = '<strong>💳 Opciones de pago disponibles:</strong><br>' +
           CONFIG.opcionesPago.map(function(op) {
@@ -747,15 +774,10 @@
 
   // ── Retorno desde Wompi ────────────────────────────────────────────────────
 
-  /**
-   * Llamada cuando la URL tiene wompi_pago=1.
-   * Wompi agrega ?id=TXN_ID&status=APPROVED (o DECLINED/VOIDED) a la redirect-url.
-   */
   async function manejarRetornoWompi() {
     const cargando = document.getElementById('paso-cargando');
     cargando.textContent = 'Verificando tu pago…';
 
-    // Limpiar la URL para evitar re-procesamiento al refrescar
     const urlLimpia = window.location.origin + window.location.pathname +
       '?caminata=' + encodeURIComponent(CAMINATA) +
       '&fecha='    + encodeURIComponent(FECHA) +
@@ -768,10 +790,6 @@
     const centavos = parseInt(params.get('centavos')) || 0;
     const status   = (params.get('status') || '').toUpperCase();
 
-    // ── Pago en proceso (PSE / ACH): el banco aún no confirmó ────────────────
-    // PSE es asíncrono: Wompi redirige con status=PENDING (o vacío) mientras
-    // el banco procesa. El webhook de Wompi actualizará PAGADA=Sí en la hoja
-    // cuando el banco confirme. NO mostrar "pago no completado".
     if (status === 'PENDING' || status === '') {
       cargando.classList.add('oculto');
       document.getElementById('icono-final').textContent = '⏳';
@@ -790,7 +808,6 @@
       return;
     }
 
-    // ── Pago rechazado o cancelado ─────────────────────────────────────────────
     if (status !== 'APPROVED') {
       cargando.classList.add('oculto');
       document.getElementById('icono-final').textContent = '❌';
@@ -807,7 +824,6 @@
       return;
     }
 
-    // Pago aprobado → confirmar en la hoja de cálculo
     try {
       const resp = await fetch(
         API_URL +
@@ -824,7 +840,6 @@
       if (data.ok) {
         mostrarPasoFinal(true, centavos);
       } else {
-        // El pago fue aprobado por Wompi pero no pudimos registrarlo en la hoja
         document.getElementById('icono-final').textContent = '⚠️';
         document.getElementById('titulo-final').textContent = 'Pago recibido';
         document.getElementById('msg-final').textContent =
