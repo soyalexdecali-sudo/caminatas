@@ -102,22 +102,45 @@
   .media-embed-vertical iframe {
     max-height: 580px;
   }
-  /* Enlace externo cuando no se puede embeber */
-  .media-link-externo {
+  /* ── Tarjeta de previsualización redes sociales ───── */
+  .media-social-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 18px;
+    text-decoration: none;
+    color: #fff;
+    transition: opacity 0.2s;
+  }
+  .media-social-card:hover { opacity: 0.88; }
+  .media-social-card .card-play {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 18px 14px;
-    background: linear-gradient(135deg, #e8f5e9, #f1f8f2);
-    color: #2e5d3f;
-    font-weight: 600;
-    font-size: 14px;
-    text-decoration: none;
-    transition: background 0.2s;
+    font-size: 22px;
+    flex-shrink: 0;
   }
-  .media-link-externo:hover {
-    background: linear-gradient(135deg, #c8e6c9, #e8f5e9);
+  .media-social-card .card-info { line-height: 1.5; }
+  .media-social-card .card-title {
+    font-size: 14px; font-weight: 700;
+  }
+  .media-social-card .card-sub {
+    font-size: 12.5px; opacity: 0.85;
+  }
+  .card-tiktok   { background: linear-gradient(135deg, #010101 40%, #25f4ee); }
+  .card-instagram{ background: linear-gradient(135deg, #833ab4, #e6683c, #fcb045); }
+  .card-facebook { background: linear-gradient(135deg, #1877f2, #0a3d91); }
+  .card-generic  { background: linear-gradient(135deg, #2e5d3f, #1a3a26); }
+  /* Thumbnail oEmbed encima de tarjeta */
+  .media-social-thumb {
+    width: 100%;
+    display: block;
+    max-height: 320px;
+    object-fit: cover;
   }
 
   /* ── Opciones de pago Wompi ─────────────────────────────── */
@@ -341,16 +364,23 @@
         ytMatch[1] + '?rel=0" allowfullscreen></iframe></div>';
     }
 
-    // 2. TikTok (@user/video/ID)
-    var ttMatch = url.match(/tiktok\.com\/@[^\/]+\/video\/(\d+)/);
-    if (ttMatch) {
-      return '<div class="media-embed media-embed-vertical"><iframe src="https://www.tiktok.com/embed/v2/' +
-        ttMatch[1] + '" allowfullscreen></iframe></div>';
-    }
-    // TikTok short URL (vm.tiktok.com / tiktok.com/t/) → enlace externo
+    // 2. TikTok (cualquier URL: @user/video/ID, corta vm/vt, etc.)
     if (/tiktok\.com/i.test(url)) {
-      return '<a class="media-link-externo" href="' + escapeHtml(url) +
-        '" target="_blank" rel="noopener">▶️ Ver video en TikTok</a>';
+      var ttMatch = url.match(/tiktok\.com\/@[^\/]+\/video\/(\d+)/);
+      if (ttMatch) {
+        // URL completa → iframe embed directo
+        return '<div class="media-embed media-embed-vertical"><iframe src="https://www.tiktok.com/embed/v2/' +
+          ttMatch[1] + '" allowfullscreen></iframe></div>';
+      }
+      // URL corta u otro formato → tarjeta con intento oEmbed
+      var ttId = 'tt-' + Date.now();
+      setTimeout(function(){ cargarOEmbed('tiktok', ttId, url); }, 100);
+      return '<div id="' + ttId + '">' +
+        '<a class="media-social-card card-tiktok" href="' + escapeHtml(url) +
+        '" target="_blank" rel="noopener">' +
+        '<span class="card-play">▶</span>' +
+        '<span class="card-info"><span class="card-title">Video en TikTok</span><br>' +
+        '<span class="card-sub">Toca para ver el video</span></span></a></div>';
     }
 
     // 3. Instagram (reel, post, tv)
@@ -361,8 +391,11 @@
         '/embed/" allowfullscreen></iframe></div>';
     }
     if (/instagram\.com/i.test(url)) {
-      return '<a class="media-link-externo" href="' + escapeHtml(url) +
-        '" target="_blank" rel="noopener">▶️ Ver contenido en Instagram</a>';
+      return '<a class="media-social-card card-instagram" href="' + escapeHtml(url) +
+        '" target="_blank" rel="noopener">' +
+        '<span class="card-play">▶</span>' +
+        '<span class="card-info"><span class="card-title">Contenido en Instagram</span><br>' +
+        '<span class="card-sub">Toca para ver en Instagram</span></span></a>';
     }
 
     // 4. Facebook Video / Reel / Watch
@@ -372,13 +405,11 @@
     }
 
     // 5. Google Drive (enlace crudo /file/d/ID/...)
+    //    → iframe /preview: funciona para IMÁGENES y VIDEOS
     var driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (driveMatch) {
-      var fid = driveMatch[1];
-      // Intentar como imagen (lh3); si falla → iframe preview (video u otro)
-      return '<img src="https://lh3.googleusercontent.com/d/' + fid +
-        '" alt="' + escapeHtml(CAMINATA) +
-        '" onerror="reemplazarConIframe(this,\'' + fid + '\')">';
+      return '<div class="media-embed"><iframe src="https://drive.google.com/file/d/' +
+        driveMatch[1] + '/preview" allowfullscreen allow="autoplay"></iframe></div>';
     }
 
     // 5b. URL ya convertida a lh3 (compatibilidad con Apps Script anterior)
@@ -411,6 +442,68 @@
     iframe.setAttribute('allow', 'autoplay');
     div.appendChild(iframe);
     img.parentNode.replaceChild(div, img);
+  }
+
+  /**
+   * Intenta cargar un embed enriquecido vía oEmbed (TikTok).
+   * Si obtiene thumbnail, lo muestra encima de la tarjeta.
+   * Si obtiene HTML embed, lo inyecta y carga el script de la plataforma.
+   */
+  function cargarOEmbed(plataforma, containerId, url) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+
+    var oembedUrl = '';
+    if (plataforma === 'tiktok') {
+      oembedUrl = 'https://www.tiktok.com/oembed?url=' + encodeURIComponent(url);
+    }
+    if (!oembedUrl) return;
+
+    fetch(oembedUrl)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data) return;
+        // Si hay thumbnail, mostrarla encima de la tarjeta
+        if (data.thumbnail_url) {
+          var card = container.querySelector('.media-social-card');
+          if (card) {
+            var img = document.createElement('img');
+            img.src = data.thumbnail_url;
+            img.className = 'media-social-thumb';
+            img.alt = data.title || 'Video';
+            card.insertBefore(img, card.firstChild);
+            card.style.flexDirection = 'column';
+            card.style.padding = '0';
+            // Mover el body de la tarjeta abajo con padding
+            var body = card.querySelector('.card-play');
+            if (body && body.parentNode) {
+              var wrap = document.createElement('div');
+              wrap.style.cssText = 'display:flex;align-items:center;gap:14px;padding:14px 16px;width:100%;';
+              wrap.innerHTML = card.querySelector('.card-play').outerHTML +
+                               card.querySelector('.card-info').outerHTML;
+              card.querySelector('.card-play').remove();
+              card.querySelector('.card-info').remove();
+              card.appendChild(wrap);
+            }
+          }
+        }
+        // Si hay HTML embed, intentar inyectarlo (mejora progresiva)
+        if (data.html && data.thumbnail_url) {
+          // Ya mostramos thumbnail, no reemplazar
+        } else if (data.html) {
+          container.innerHTML = data.html;
+          // Cargar script de embed de la plataforma
+          if (plataforma === 'tiktok' && !document.querySelector('script[src*="tiktok.com/embed.js"]')) {
+            var s = document.createElement('script');
+            s.src = 'https://www.tiktok.com/embed.js';
+            s.async = true;
+            document.body.appendChild(s);
+          }
+        }
+      })
+      .catch(function() {
+        // Fallo silencioso: la tarjeta de fallback ya es visible
+      });
   }
 
   function mostrarInfoCaminata() {
