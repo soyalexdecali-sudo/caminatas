@@ -57,7 +57,7 @@
   .cerrado-icono { font-size: 48px; margin-bottom: 8px; }
   .cargando-wrap { text-align: center; padding: 24px 0; color: #5c6b62; font-size: 14px; }
 
-  /* ── Info de la caminata (imagen + descripción) ─────────── */
+  /* ── Info de la caminata (imagen/video + descripción) ───── */
   .info-caminata {
     margin: 0 0 20px;
     border-radius: 10px;
@@ -66,17 +66,58 @@
     background: #f7f9f7;
   }
   .info-caminata img {
-  width: 100%;
-  max-height: none;
-  object-fit: contain;
-  display: block;
-}
+    width: 100%;
+    max-height: none;
+    object-fit: contain;
+    display: block;
+  }
   .info-caminata-desc {
     padding: 12px 14px;
     font-size: 13.5px;
     line-height: 1.6;
     color: #3a4a3f;
     white-space: pre-line;
+  }
+  /* Contenedor responsive para iframes de video (16:9) */
+  .media-embed {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    background: #000;
+  }
+  .media-embed iframe,
+  .media-embed video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+  }
+  /* Aspecto vertical para TikTok / Reels (9:16) */
+  .media-embed-vertical {
+    padding-bottom: 125%;
+    max-height: 580px;
+  }
+  .media-embed-vertical iframe {
+    max-height: 580px;
+  }
+  /* Enlace externo cuando no se puede embeber */
+  .media-link-externo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 14px;
+    background: linear-gradient(135deg, #e8f5e9, #f1f8f2);
+    color: #2e5d3f;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .media-link-externo:hover {
+    background: linear-gradient(135deg, #c8e6c9, #e8f5e9);
   }
 
   /* ── Opciones de pago Wompi ─────────────────────────────── */
@@ -279,17 +320,109 @@
     return '$' + (parseInt(n) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
-  // ── Info de la caminata (imagen + descripción) ─────────────────────────────
+  // ── Info de la caminata (imagen/video + descripción) ────────────────────────
+
+  /**
+   * Detecta el tipo de medio y genera el HTML adecuado:
+   *  - Imagen de Google Drive  → <img> con lh3 (fallback a iframe /preview)
+   *  - Video de Google Drive   → iframe /preview (fallback automático)
+   *  - YouTube / Shorts        → iframe embed
+   *  - TikTok                  → iframe embed v2
+   *  - Instagram Reel/Post     → iframe embed
+   *  - Facebook Video          → iframe plugin
+   *  - Video directo (mp4…)    → <video>
+   *  - Otro enlace             → <img> o enlace externo
+   */
+  function renderMedia(url) {
+    // 1. YouTube (watch, embed, shorts, youtu.be)
+    var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch) {
+      return '<div class="media-embed"><iframe src="https://www.youtube.com/embed/' +
+        ytMatch[1] + '?rel=0" allowfullscreen></iframe></div>';
+    }
+
+    // 2. TikTok (@user/video/ID)
+    var ttMatch = url.match(/tiktok\.com\/@[^\/]+\/video\/(\d+)/);
+    if (ttMatch) {
+      return '<div class="media-embed media-embed-vertical"><iframe src="https://www.tiktok.com/embed/v2/' +
+        ttMatch[1] + '" allowfullscreen></iframe></div>';
+    }
+    // TikTok short URL (vm.tiktok.com / tiktok.com/t/) → enlace externo
+    if (/tiktok\.com/i.test(url)) {
+      return '<a class="media-link-externo" href="' + escapeHtml(url) +
+        '" target="_blank" rel="noopener">▶️ Ver video en TikTok</a>';
+    }
+
+    // 3. Instagram (reel, post, tv)
+    var igMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/);
+    if (igMatch) {
+      return '<div class="media-embed" style="padding-bottom:125%;max-height:580px;">' +
+        '<iframe src="https://www.instagram.com/p/' + igMatch[1] +
+        '/embed/" allowfullscreen></iframe></div>';
+    }
+    if (/instagram\.com/i.test(url)) {
+      return '<a class="media-link-externo" href="' + escapeHtml(url) +
+        '" target="_blank" rel="noopener">▶️ Ver contenido en Instagram</a>';
+    }
+
+    // 4. Facebook Video / Reel / Watch
+    if (/facebook\.com.*(?:video|watch|reel)/i.test(url)) {
+      return '<div class="media-embed"><iframe src="https://www.facebook.com/plugins/video.php?href=' +
+        encodeURIComponent(url) + '&show_text=false" allowfullscreen></iframe></div>';
+    }
+
+    // 5. Google Drive (enlace crudo /file/d/ID/...)
+    var driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveMatch) {
+      var fid = driveMatch[1];
+      // Intentar como imagen (lh3); si falla → iframe preview (video u otro)
+      return '<img src="https://lh3.googleusercontent.com/d/' + fid +
+        '" alt="' + escapeHtml(CAMINATA) +
+        '" onerror="reemplazarConIframe(this,\'' + fid + '\')">';
+    }
+
+    // 5b. URL ya convertida a lh3 (compatibilidad con Apps Script anterior)
+    var lh3Match = url.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+    if (lh3Match) {
+      var fid2 = lh3Match[1];
+      return '<img src="' + escapeHtml(url) +
+        '" alt="' + escapeHtml(CAMINATA) +
+        '" onerror="reemplazarConIframe(this,\'' + fid2 + '\')">';
+    }
+
+    // 6. Video directo (mp4, webm, ogg, mov)
+    if (/\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)) {
+      return '<div class="media-embed"><video controls playsinline>' +
+        '<source src="' + escapeHtml(url) + '"></video></div>';
+    }
+
+    // 7. Por defecto → intentar como imagen
+    return '<img src="' + escapeHtml(url) + '" alt="' + escapeHtml(CAMINATA) +
+      '" onerror="this.style.display=\'none\'">';
+  }
+
+  /** Reemplaza un <img> que falló por un iframe de preview de Drive (sirve para video). */
+  function reemplazarConIframe(img, fileId) {
+    var div = document.createElement('div');
+    div.className = 'media-embed';
+    var iframe = document.createElement('iframe');
+    iframe.src = 'https://drive.google.com/file/d/' + fileId + '/preview';
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('allow', 'autoplay');
+    div.appendChild(iframe);
+    img.parentNode.replaceChild(div, img);
+  }
+
   function mostrarInfoCaminata() {
     const divInfo = document.getElementById('info-caminata');
-    const imagen      = CONFIG.imagen      || '';
+    const mediaUrl    = CONFIG.imagen      || '';
     const descripcion = CONFIG.descripcion || '';
 
-    if (!imagen && !descripcion) return; // nada que mostrar
+    if (!mediaUrl && !descripcion) return; // nada que mostrar
 
     let html = '';
-    if (imagen) {
-      html += '<img src="' + escapeHtml(imagen) + '" alt="' + escapeHtml(CAMINATA) + '" onerror="this.style.display=\'none\'">';
+    if (mediaUrl) {
+      html += renderMedia(mediaUrl);
     }
     if (descripcion) {
       html += '<div class="info-caminata-desc">' + escapeHtml(descripcion) + '</div>';
